@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AchingRevitAddIn", "AchingRevitAddIn\AchingRevitAddIn.csproj", "{079662BF-19A3-4EBA-8F8C-E59CAC53AB4F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{079662BF-19A3-4EBA-8F8C-E59CAC53AB4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{079662BF-19A3-4EBA-8F8C-E59CAC53AB4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{079662BF-19A3-4EBA-8F8C-E59CAC53AB4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{079662BF-19A3-4EBA-8F8C-E59CAC53AB4F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {173BE423-5455-4444-A9BB-CE2FC8116FCF}
+	EndGlobalSection
+EndGlobal
