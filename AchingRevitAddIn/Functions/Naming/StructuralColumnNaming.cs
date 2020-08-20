@@ -24,13 +24,21 @@ namespace AchingRevitAddIn.Functions.Naming
 
             try
             {
-                Selection selection = uiapp.ActiveUIDocument.Selection;
-                IList<Reference> strColumns = selection.PickObjects(ObjectType.Element, new StrColumnPickFilter(), "Select columns to name");
+                //Selection selection = uiapp.ActiveUIDocument.Selection;
+                //IList<Reference> strColumns = selection.PickObjects(ObjectType.Element, new StrColumnPickFilter(), "Select columns to name");
 
-                foreach(Reference element in strColumns)
+                //strColumns = strColumns.OrderByDescending(x => x.GlobalPoint.Y).ToList();
+                //int cont = strColumns.Count();
+
+                var columnCollector = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance));
+                columnCollector.OfCategory(BuiltInCategory.OST_StructuralColumns);
+                IList<Element> columnList = columnCollector.ToElements();
+                columnList = columnList.OrderByDescending(x => x.Location).ToList();
+
+
+                foreach(Element column in columnList)
                 {
-                    XYZ globalPoint = element.GlobalPoint;
-
+                    Parameter columnMark = column.LookupParameter("Mark");
                 }
 
                 //Transaction trans = new Transaction(doc);
