@@ -30,6 +30,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>AchingRevitAddIn.addin</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="RevitAPI">
       <HintPath>..\..\Program Files\Autodesk\Revit 2020\RevitAPI.dll</HintPath>
@@ -49,10 +52,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App.cs" />
-    <Compile Include="Filters\ElementFilter\StrColumnPickFilter.cs" />
-    <Compile Include="Functions\Naming\StructuralColumnNaming.cs" />
+    <Compile Include="Commands\Naming\StructuralColumnNaming.cs" />
+    <Compile Include="Filters\StructuralColumnFilter.cs" />
+    <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="AchingRevitAddIn.addin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Images\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetDir)"."" "C:\ProgramData\Autodesk\Revit\Addins\2020"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

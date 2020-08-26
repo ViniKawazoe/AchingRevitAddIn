@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>AchingRevitAddIn</Name>
+		<Assembly>AchingRevitAddIn.dll</Assembly>
+		<AddInId>
+			05C26731-592E-4465-8E44-3716273068E1
+		</AddInId>
+		<FullClassName>AchingRevitAddIn.Main</FullClassName>
+		<VendorId>ACHING</VendorId>
+		<VendorDescription>Aching, www.achingprojetos.com</VendorDescription>
+	</AddIn>
+</RevitAddIns>

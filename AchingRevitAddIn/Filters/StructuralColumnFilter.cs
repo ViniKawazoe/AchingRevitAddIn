@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region namespace
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,14 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+#endregion
 
-namespace AchingRevitAddIn.Filters.ElementFilter
+namespace AchingRevitAddIn
 {
-    public class StrColumnPickFilter : ISelectionFilter
+    /// <summary>
+    /// Filter for structural columns
+    /// </summary>
+    class StructuralColumnFilter : ISelectionFilter
     {
         public bool AllowElement(Element elem)
         {
