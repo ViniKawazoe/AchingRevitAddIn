@@ -6,6 +6,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
+using AchingRevitAddIn.Commands.Naming.StructuralColumnNaming;
 #endregion
 
 namespace AchingRevitAddIn
@@ -35,6 +36,9 @@ namespace AchingRevitAddIn
 
             try
             {
+                StructuralColumnNamingUI structuralColumnNamingUI = new StructuralColumnNamingUI();
+                var res = structuralColumnNamingUI.ShowDialog();
+
                 // Create filter
                 StructuralColumnFilter filter = new StructuralColumnFilter();
 
@@ -84,6 +88,10 @@ namespace AchingRevitAddIn
                 return Result.Failed;
             }
         }
+
+        //public void ShowUI
+
+
         #endregion
     }
 }
