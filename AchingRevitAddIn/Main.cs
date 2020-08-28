@@ -15,6 +15,18 @@ namespace AchingRevitAddIn
     {
         public Result OnStartup(UIControlledApplication application)
         {
+            CreateRibbon(application);            
+
+            return Result.Succeeded;
+        }
+
+        public Result OnShutdown(UIControlledApplication application)
+        {
+            return Result.Succeeded;
+        }
+
+        public void CreateRibbon(UIControlledApplication application)
+        {
             // Create a custom ribbon tab
             string tabName = "Aching";
             application.CreateRibbonTab(tabName);
@@ -31,14 +43,6 @@ namespace AchingRevitAddIn
 
             // Add buttons to the panel
             namingPanel.AddItem(strClmnNaming);
-            
-
-            return Result.Succeeded;
-        }
-
-        public Result OnShutdown(UIControlledApplication application)
-        {
-            return Result.Succeeded;
         }
     }
 }

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
@@ -27,6 +25,14 @@ namespace AchingRevitAddIn
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
 
+            // Only allow view plans, 3D views, sections and elevations
+            if(uidoc.ActiveView as ViewPlan == null &&
+                uidoc.ActiveView as View3D == null &&
+                uidoc.ActiveView as ViewSection == null)
+            {
+                return Result.Failed;
+            }
+
             try
             {
                 // Create filter
@@ -39,8 +45,8 @@ namespace AchingRevitAddIn
                 IList<Element> strColumns = pickedReferences.Select(x => doc.GetElement(x)).ToList();
 
                 // Order the structural columns by location
-                IList<Element> sortedStrColumns = strColumns.OrderByDescending(x => x.GetAnalyticalModel().GetCurve().GetEndPoint(0).Y)
-                    .ThenBy(x => x.GetAnalyticalModel().GetCurve().GetEndPoint(0).X).ToList();
+                IList<Element> sortedStrColumns = strColumns.OrderByDescending(x => (x.Location as LocationPoint).Point.Y)
+                    .ThenBy(x => (x.Location as LocationPoint).Point.X).ToList();
 
                 // Set the initial number of the structural column
                 int count = 1;
@@ -54,40 +60,12 @@ namespace AchingRevitAddIn
 
                     foreach (Element strColumn in sortedStrColumns)
                     {
-
                         Parameter p = strColumn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
 
-                        if (sortedStrColumns.Count < 10)
-                        {
-                            p.Set(prefix + count);
-                        }
-                        if (sortedStrColumns.Count >= 10 && sortedStrColumns.Count < 100)
-                        {
-                            if (count < 10)
-                            {
-                                p.Set(prefix + "0" + count);
-                            }
-                            else
-                            {
-                                p.Set(prefix + count);
-                            }
-                        }
-                        if (sortedStrColumns.Count >= 100 && sortedStrColumns.Count < 1000)
-                        {
-                            if (count < 10)
-                            {
-                                p.Set(prefix + "00" + count);
-                            }
-                            else if (count >= 10 && count < 100)
-                            {
-                                p.Set(prefix + "0" + count);
-                            }
-                            else
-                            {
-                                p.Set(prefix + count);
-                            }
-                        }
+                        GenerateName generatedName = new GenerateName();
+                        string name = generatedName.Name(count, prefix, sortedStrColumns.Count);
 
+                        p.Set(name);
                         count++;
                     }
 
