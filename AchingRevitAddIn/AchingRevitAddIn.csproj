@@ -79,13 +79,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Naming\GenerateName.cs" />
-    <Compile Include="Commands\Naming\StructuralColumnNaming\StructuralColumnNaming.cs" />
-    <Compile Include="Commands\Naming\StructuralColumnNaming\StructuralColumnNamingUI.xaml.cs">
-      <DependentUpon>StructuralColumnNamingUI.xaml</DependentUpon>
+    <Compile Include="Commands\Naming\StructuralColumns\StructuralColumnsNaming.cs" />
+    <Compile Include="Commands\Naming\StructuralColumns\StructuralColumnsNamingUI.xaml.cs">
+      <DependentUpon>StructuralColumnsNamingUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Filters\StructuralColumnFilter.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\ResourceAssembly.cs" />
+    <Compile Include="Resources\ResourceImage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AchingRevitAddIn.addin">
@@ -93,25 +95,25 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\AA-LOGO.png">
+    <EmbeddedResource Include="Images\Icons\AA-LOGO.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Commands\Naming\StructuralColumnNaming\StructuralColumnNamingUI.xaml">
+    <EmbeddedResource Include="Images\Icons\AA-LOGO.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\Icons\AA-LOGO_CompridoTransparente.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Commands\Naming\StructuralColumns\StructuralColumnsNamingUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Images\AA-LOGO.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Images\AA-LOGO_CompridoTransparente.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

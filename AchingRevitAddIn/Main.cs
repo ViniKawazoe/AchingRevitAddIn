@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region namespaces
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
+#endregion
 
 namespace AchingRevitAddIn
 {
@@ -15,7 +17,7 @@ namespace AchingRevitAddIn
     {
         public Result OnStartup(UIControlledApplication application)
         {
-            CreateRibbon(application);            
+            CreateRibbon(application);
 
             return Result.Succeeded;
         }
@@ -33,10 +35,10 @@ namespace AchingRevitAddIn
 
             // Create a push button
             string path = Assembly.GetExecutingAssembly().Location;
-            PushButtonData strClmnNaming = new PushButtonData("Button 1", "Nomear pilares", path, "AchingRevitAddIn.StructuralColumnNaming");
-
+            PushButtonData strClmnNaming = new PushButtonData("StructuralColumnNamingButton", "Column Naming", path , "AchingRevitAddIn.StructuralColumnsNaming");
+            
             // Create a ribbon panel
-            RibbonPanel namingPanel = application.CreateRibbonPanel(tabName, "Nomear elementos");
+            RibbonPanel namingPanel = application.CreateRibbonPanel(tabName, "Element Naming");
 
             // Add button image
             // Create later
