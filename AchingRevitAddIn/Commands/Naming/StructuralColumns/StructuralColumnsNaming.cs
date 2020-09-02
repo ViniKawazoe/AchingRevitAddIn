@@ -11,15 +11,27 @@ using Autodesk.Revit.ApplicationServices;
 
 namespace AchingRevitAddIn
 {
+    /*
+    public class GlobalObjects
+    {
+        public static UIDocument uidoc;
+    }
+    */
+
     [Transaction(TransactionMode.Manual)]
     class StructuralColumnsNaming : IExternalCommand
     {
+        private static UIDocument Uidoc { get; set; }
+
         #region public methods
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             // Get UIDocument and Document
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
+
+            // Send it to the public variable so other methods can call it
+            Uidoc = uidoc;
 
             // Only allow view plans, 3D views, sections and elevations
             if (uidoc.ActiveView as ViewPlan == null &&
@@ -38,11 +50,13 @@ namespace AchingRevitAddIn
         /// <summary>
         /// Create a "Mark" parameter for each of the selected structural column
         /// </summary>
+        /// <param name="uidoc"></param>
         /// <param name="prefix"></param>
         /// <param name="initialNumber"></param>
-        static internal void NameColumns(UIDocument uidoc, string prefix, int initialNumber)
+        static internal void NameColumns(string prefix, int initialNumber)
         {
             // Get Document
+            UIDocument uidoc = Uidoc;
             Document doc = uidoc.Document;
 
             // Create filter

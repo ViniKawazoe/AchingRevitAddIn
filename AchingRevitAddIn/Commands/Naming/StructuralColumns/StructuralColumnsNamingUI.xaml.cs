@@ -1,4 +1,5 @@
 ﻿#region namespaces
+using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
@@ -15,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 #endregion
 
 namespace AchingRevitAddIn
@@ -33,10 +35,7 @@ namespace AchingRevitAddIn
         {
             if (this.PrefixText.Text != "" && this.InitialNumberText.Text != "")
             {
-                //TaskDialog.Show("Test", "Test...");
-                UIDocument uidoc = (sender as UIApplication).ActiveUIDocument;
-
-                StructuralColumnsNaming.NameColumns(uidoc, this.PrefixText.Text, int.Parse(this.InitialNumberText.Text));
+                StructuralColumnsNaming.NameColumns(this.PrefixText.Text, int.Parse(this.InitialNumberText.Text));
             }
             else
             {
