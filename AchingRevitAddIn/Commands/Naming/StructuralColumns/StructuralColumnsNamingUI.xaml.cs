@@ -1,22 +1,5 @@
 ﻿#region namespaces
-using Autodesk.Revit.ApplicationServices;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Application = Autodesk.Revit.ApplicationServices.Application;
 #endregion
 
 namespace AchingRevitAddIn
@@ -33,9 +16,19 @@ namespace AchingRevitAddIn
 
         private void SelectColumnsButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.PrefixText.Text != "" && this.InitialNumberText.Text != "")
+            if (PrefixText.Text != "" && InitialNumberText.Text != "")
             {
-                StructuralColumnsNaming.NameColumns(this.PrefixText.Text, int.Parse(this.InitialNumberText.Text));
+                ///Sets the prefix of the columns names
+                string prefix = PrefixText.Text;
+                ///Sets the initial number of the columns names
+                int initialNumber = int.Parse(InitialNumberText.Text);
+                ///Sets the order to which the method will organize the names
+                int index = SortDropdown.SelectedIndex;
+                ///Choose if the created names are going to be replicated to the aligned columns
+                bool checkbox = (bool) ReplicateCheckBox.IsChecked;
+
+                this.Close();
+                StructuralColumnsNaming.NameColumns(prefix, initialNumber, index, checkbox);
             }
             else
             {

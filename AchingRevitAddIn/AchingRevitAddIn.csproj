@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Naming\GenerateName.cs" />
+    <Compile Include="Commands\Naming\StructuralColumns\NamingOrder.cs" />
     <Compile Include="Commands\Naming\StructuralColumns\StructuralColumnsNaming.cs" />
     <Compile Include="Commands\Naming\StructuralColumns\StructuralColumnsNamingUI.xaml.cs">
       <DependentUpon>StructuralColumnsNamingUI.xaml</DependentUpon>
@@ -114,6 +115,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\Icons\P1 - 32pix - v1.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -53,42 +53,77 @@ namespace AchingRevitAddIn
         /// <param name="uidoc"></param>
         /// <param name="prefix"></param>
         /// <param name="initialNumber"></param>
-        static internal void NameColumns(string prefix, int initialNumber)
+        static internal void NameColumns(string prefix, int initialNumber, int sortIndex, bool replicate)
         {
-            // Get Document
-            UIDocument uidoc = Uidoc;
-            Document doc = uidoc.Document;
-
-            // Create filter
-            StructuralColumnFilter filter = new StructuralColumnFilter();
-
-            // Apply filter and select multiple structural columns
-            IList<Reference> pickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, filter, "Select structural columns");
-
-            // Convert References to Elements
-            IList<Element> strColumns = pickedReferences.Select(x => doc.GetElement(x)).ToList();
-
-            // Order the structural columns by location
-            IList<Element> sortedStrColumns = strColumns.OrderByDescending(x => (x.Location as LocationPoint).Point.Y)
-                .ThenBy(x => (x.Location as LocationPoint).Point.X).ToList();
-
-            using (Transaction trans = new Transaction(doc))
+            try
             {
-                trans.Start("Set 'Mark' parameter");
+                // Get Document
+                UIDocument uidoc = Uidoc;
+                Document doc = uidoc.Document;
 
-                foreach (Element strColumn in sortedStrColumns)
+                // Create filter
+                StructuralColumnFilter filter = new StructuralColumnFilter();
+
+                // Apply filter and select multiple structural columns
+                IList<Reference> pickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, filter, "Select structural columns");
+
+                // Convert References to Elements
+                IList<Element> strColumns = pickedReferences.Select(x => doc.GetElement(x)).ToList();
+
+                IList<Element> sortedStrColumns = null;
+
+                // Order the structural columns by location
+                if (sortIndex == 0)
                 {
-                    Parameter p = strColumn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
-
-                    GenerateName generatedName = new GenerateName();
-                    string name = generatedName.Name(initialNumber, prefix, sortedStrColumns.Count);
-
-                    p.Set(name);
-                    initialNumber++;
+                    sortedStrColumns = strColumns.OrderByDescending(x => (x.Location as LocationPoint).Point.Y)
+                        .ThenBy(x => (x.Location as LocationPoint).Point.X).ToList();
+                }
+                if (sortIndex == 1)
+                {
+                    sortedStrColumns = strColumns.OrderByDescending(x => (x.Location as LocationPoint).Point.Y)
+                        .ThenByDescending(x => (x.Location as LocationPoint).Point.X).ToList();
+                }
+                if (sortIndex == 2)
+                {
+                    sortedStrColumns = strColumns.OrderBy(x => (x.Location as LocationPoint).Point.Y)
+                        .ThenBy(x => (x.Location as LocationPoint).Point.X).ToList();
+                }
+                if (sortIndex == 3)
+                {
+                    sortedStrColumns = strColumns.OrderBy(x => (x.Location as LocationPoint).Point.Y)
+                        .ThenByDescending(x => (x.Location as LocationPoint).Point.X).ToList();
                 }
 
-                trans.Commit();
+                using (Transaction trans = new Transaction(doc))
+                {
+                    trans.Start("Set 'Mark' parameter");
+
+                    foreach (Element strColumn in sortedStrColumns)
+                    {
+                        Parameter p = strColumn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                        GenerateName generatedName = new GenerateName();
+                        string name = generatedName.Name(initialNumber, prefix, sortedStrColumns.Count);
+
+                        p.Set(name);
+                        initialNumber++;
+                    }
+
+                    trans.Commit();
+                }
+
+                if (replicate)
+                {
+
+                }
             }
+            catch
+            {
+            }
+        }
+
+        static internal void ReplicateToAlignedColumns()
+        {
 
         }
         #endregion

@@ -1,4 +1,5 @@
 ﻿#region namespaces
+using System.IO;
 using System.Windows.Media.Imaging;
 #endregion
 
@@ -22,8 +23,8 @@ namespace AchingRevitAddIn.Resources
         public static BitmapImage GetIcon(string name)
         {
             // Create the resource reader stream
-            var stream = ResourceAssembly.GetAssembly().GetManifestResourceStream(ResourceAssembly.GetNamespace() + "Images.Icons." + name);
-            var image = new BitmapImage();
+            Stream stream = ResourceAssembly.GetAssembly().GetManifestResourceStream(ResourceAssembly.GetNamespace() + "Images.Icons." + name);
+            BitmapImage image = new BitmapImage();
 
             // Construct and return image
             image.BeginInit();

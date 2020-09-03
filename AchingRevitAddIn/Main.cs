@@ -9,6 +9,9 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
+using System.Windows.Media.Imaging;
+using AchingRevitAddIn.Resources;
+using System.IO;
 #endregion
 
 namespace AchingRevitAddIn
@@ -41,10 +44,13 @@ namespace AchingRevitAddIn
             RibbonPanel namingPanel = application.CreateRibbonPanel(tabName, "Element Naming");
 
             // Add button image
-            // Create later
+            BitmapImage strColumnNamingImage = new BitmapImage(new Uri(@"C:\Users\Avell\Google Drive\P1 - 32pix - v8.png"));
+            
 
             // Add buttons to the panel
-            namingPanel.AddItem(strClmnNaming);
+            PushButton strColumnNamingButton = namingPanel.AddItem(strClmnNaming) as PushButton;
+            strColumnNamingButton.LargeImage = strColumnNamingImage;
+            //strColumnNamingButton.LargeImage = ResourceImage.GetIcon("P1 - 32pix - v1.png");
         }
     }
 }
