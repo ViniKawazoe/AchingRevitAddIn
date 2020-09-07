@@ -6,18 +6,10 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
-using Autodesk.Revit.ApplicationServices;
 #endregion
 
 namespace AchingRevitAddIn
 {
-    /*
-    public class GlobalObjects
-    {
-        public static UIDocument uidoc;
-    }
-    */
-
     [Transaction(TransactionMode.Manual)]
     class StructuralColumnsNaming : IExternalCommand
     {
@@ -28,7 +20,7 @@ namespace AchingRevitAddIn
         {
             // Get UIDocument and Document
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
+            //Document doc = uidoc.Document;
 
             // Send it to the public variable so other methods can call it
             Uidoc = uidoc;

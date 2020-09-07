@@ -12,6 +12,7 @@ using Autodesk.Revit.UI.Selection;
 using System.Windows.Media.Imaging;
 using AchingRevitAddIn.Resources;
 using System.IO;
+using System.Windows.Media;
 #endregion
 
 namespace AchingRevitAddIn
@@ -38,19 +39,33 @@ namespace AchingRevitAddIn
 
             // Create a push button
             string path = Assembly.GetExecutingAssembly().Location;
-            PushButtonData strClmnNaming = new PushButtonData("StructuralColumnNamingButton", "Column Naming", path , "AchingRevitAddIn.StructuralColumnsNaming");
+            PushButtonData strClmnNaming = new PushButtonData("StructuralColumnNamingButton", "Columns", path , "AchingRevitAddIn.StructuralColumnsNaming");
+            PushButtonData strFrmnNaming = new PushButtonData("StructuralFramingNamingButton", "Beams", path, "AchingRevitAddIn.StructuralFramingNaming");
+            PushButtonData floorNaming = new PushButtonData("FloorNamingButton", "Floors", path, "AchingRevitAddIn.FloorNaming");
+            PushButtonData strFndtnNaming = new PushButtonData("StructuralFoundationNamingButton", "Foundations", path, "AchingRevitAddIn.StructuralFoundationNaming");
             
             // Create a ribbon panel
             RibbonPanel namingPanel = application.CreateRibbonPanel(tabName, "Element Naming");
 
-            // Add button image
-            BitmapImage strColumnNamingImage = new BitmapImage(new Uri(@"C:\Users\Avell\Google Drive\P1 - 32pix - v8.png"));
-            
-
             // Add buttons to the panel
             PushButton strColumnNamingButton = namingPanel.AddItem(strClmnNaming) as PushButton;
-            strColumnNamingButton.LargeImage = strColumnNamingImage;
-            //strColumnNamingButton.LargeImage = ResourceImage.GetIcon("P1 - 32pix - v1.png");
+            PushButton strFrmnNamingButton = namingPanel.AddItem(strFrmnNaming) as PushButton;
+            PushButton floorNamingButton = namingPanel.AddItem(floorNaming) as PushButton;
+            PushButton strFndtnNamingButton = namingPanel.AddItem(strFndtnNaming) as PushButton;
+
+            // Add button image
+            strColumnNamingButton.LargeImage = PngImageSource("StrColumnNamingImage.png");
+            strFrmnNamingButton.LargeImage = PngImageSource("StrFramingNamingImage.png");
+            floorNamingButton.LargeImage = PngImageSource("FloorNamingImage.png");
+            strFndtnNamingButton.LargeImage = PngImageSource("StrFoundationNamingImage.png");
+        }
+
+        private ImageSource PngImageSource (string ImageName)
+        {
+            Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AchingRevitAddIn.Images.Icons." + ImageName);
+            PngBitmapDecoder image = new PngBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+
+            return image.Frames[0];
         }
     }
 }

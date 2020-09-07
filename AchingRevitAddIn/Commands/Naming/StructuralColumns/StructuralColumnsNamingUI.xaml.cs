@@ -1,5 +1,7 @@
 ﻿#region namespaces
+using System;
 using System.Windows;
+using System.Windows.Media.Imaging;
 #endregion
 
 namespace AchingRevitAddIn
@@ -12,6 +14,13 @@ namespace AchingRevitAddIn
         public StructuralColumnNamingUI()
         {
             InitializeComponent();
+            SetIcon();
+        }
+
+        void SetIcon()
+        {
+            Uri icon = new Uri("pack://application,,,/Images/Icons/AA-LOGO.ico", UriKind.RelativeOrAbsolute);
+            this.Icon = BitmapFrame.Create(icon);
         }
 
         private void SelectColumnsButton_Click(object sender, RoutedEventArgs e)
