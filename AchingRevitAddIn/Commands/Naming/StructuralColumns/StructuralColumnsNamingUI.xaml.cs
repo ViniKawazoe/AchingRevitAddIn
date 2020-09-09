@@ -14,7 +14,8 @@ namespace AchingRevitAddIn
         public StructuralColumnNamingUI()
         {
             InitializeComponent();
-            SetIcon();
+            //SetIcon();
+            //Tried to set icon, but it doesn't work
         }
 
         void SetIcon()

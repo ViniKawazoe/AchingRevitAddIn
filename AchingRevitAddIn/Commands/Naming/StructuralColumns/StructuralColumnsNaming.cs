@@ -6,6 +6,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
+using System.Windows.Forms.VisualStyles;
 #endregion
 
 namespace AchingRevitAddIn
@@ -49,7 +50,7 @@ namespace AchingRevitAddIn
         {
             try
             {
-                // Get Document
+                // Get UIDocument and Document
                 UIDocument uidoc = Uidoc;
                 Document doc = uidoc.Document;
 
@@ -106,7 +107,10 @@ namespace AchingRevitAddIn
 
                 if (replicate)
                 {
-
+                    foreach (Element column in sortedStrColumns)
+                    {
+                        ReplicateToAlignedColumns(column);
+                    }
                 }
             }
             catch
@@ -114,9 +118,58 @@ namespace AchingRevitAddIn
             }
         }
 
-        static internal void ReplicateToAlignedColumns()
+        static internal void ReplicateToAlignedColumns(Element structuralColumn)
         {
+            // Get UIDocument and Document
+            UIDocument uidoc = Uidoc;
+            Document doc = uidoc.Document;
 
+            Element referenceColumn = structuralColumn;
+            //Element newReferenceColumn = null;
+
+            while (referenceColumn != null)
+            {
+                // Get reference columns location point and 'Mark' parameter
+                XYZ referenceColumnLocation = (referenceColumn.Location as LocationPoint).Point;
+                Parameter referenceColumnMark = referenceColumn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                // Get column and top level
+                Parameter columnTopLevel = structuralColumn.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM);
+
+                // Get all columns on the top level
+                ElementLevelFilter levelFilter = new ElementLevelFilter(columnTopLevel.AsElementId());
+                FilteredElementCollector collector = new FilteredElementCollector(doc);
+                ICollection<Element> allColumnsOnTopLevel = collector.OfCategory(BuiltInCategory.OST_StructuralColumns).WherePasses(levelFilter).ToElements();
+
+                using (Transaction trans = new Transaction(doc))
+                {
+                    trans.Start("Replicate 'Mark' parameter");
+
+                    if (allColumnsOnTopLevel != null)
+                    {
+
+                        foreach (Element column in allColumnsOnTopLevel)
+                        {
+                            XYZ columnLocation = (column.Location as LocationPoint).Point;
+                            Parameter p = column.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                            if (columnLocation.IsAlmostEqualTo(referenceColumnLocation, 0.001))
+                            {
+                                p.Set(referenceColumnMark.ToString());
+                                //newReferenceColumn = column;
+                            }
+                        }
+                        //referenceColumn = newReferenceColumn;
+
+                    }
+                    else
+                    {
+                        referenceColumn = null;
+                    }
+
+                    trans.Commit();
+                }
+            }
         }
         #endregion
     }
