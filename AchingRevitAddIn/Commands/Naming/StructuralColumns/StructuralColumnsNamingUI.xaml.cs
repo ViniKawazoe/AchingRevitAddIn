@@ -9,7 +9,7 @@ namespace AchingRevitAddIn
     /// <summary>
     /// Interaction logic for StructuralColumnNamingUI.xaml
     /// </summary>
-    public partial class StructuralColumnNamingUI : Window
+    public partial class StructuralColumnNamingUI : Window, IDisposable
     {
         public StructuralColumnNamingUI()
         {
@@ -49,6 +49,11 @@ namespace AchingRevitAddIn
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        public void Dispose()
         {
             this.Close();
         }

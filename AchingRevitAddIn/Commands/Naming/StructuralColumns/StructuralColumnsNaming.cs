@@ -1,12 +1,10 @@
 ﻿#region namespaces
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
-using System.Windows.Forms.VisualStyles;
 #endregion
 
 namespace AchingRevitAddIn
@@ -21,7 +19,6 @@ namespace AchingRevitAddIn
         {
             // Get UIDocument and Document
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            //Document doc = uidoc.Document;
 
             // Send it to the public variable so other methods can call it
             Uidoc = uidoc;
@@ -89,7 +86,15 @@ namespace AchingRevitAddIn
 
                 using (Transaction trans = new Transaction(doc))
                 {
+
                     trans.Start("Set 'Mark' parameter");
+                    
+                    // Remove warnings
+                    FailureHandlingOptions failureHandlingOptions = trans.GetFailureHandlingOptions();
+                    FailureHandler failureHandler = new FailureHandler();
+                    failureHandlingOptions.SetFailuresPreprocessor(failureHandler);
+                    failureHandlingOptions.SetClearAfterRollback(true);
+                    trans.SetFailureHandlingOptions(failureHandlingOptions);
 
                     foreach (Element strColumn in sortedStrColumns)
                     {
@@ -102,14 +107,14 @@ namespace AchingRevitAddIn
                         initialNumber++;
                     }
 
-                    trans.Commit();
+                    trans.Commit(failureHandlingOptions);
                 }
 
                 if (replicate)
                 {
                     foreach (Element column in sortedStrColumns)
                     {
-                        ReplicateToAlignedColumns(column);
+                        ReplicateAbove(column);
                     }
                 }
             }
@@ -118,23 +123,28 @@ namespace AchingRevitAddIn
             }
         }
 
-        static internal void ReplicateToAlignedColumns(Element structuralColumn)
+        /// <summary>
+        /// Replicate the 'Mark' parameter from the structural column to the aligned columns above
+        /// </summary>
+        /// <param name="structuralColumn"></param>
+        static internal void ReplicateAbove(Element structuralColumn)
         {
             // Get UIDocument and Document
             UIDocument uidoc = Uidoc;
             Document doc = uidoc.Document;
 
             Element referenceColumn = structuralColumn;
-            //Element newReferenceColumn = null;
 
             while (referenceColumn != null)
             {
+                Element newReferenceColumn = null;
+
                 // Get reference columns location point and 'Mark' parameter
                 XYZ referenceColumnLocation = (referenceColumn.Location as LocationPoint).Point;
-                Parameter referenceColumnMark = referenceColumn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+                string referenceColumnMark = referenceColumn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsString();
 
                 // Get column and top level
-                Parameter columnTopLevel = structuralColumn.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM);
+                Parameter columnTopLevel = referenceColumn.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM);
 
                 // Get all columns on the top level
                 ElementLevelFilter levelFilter = new ElementLevelFilter(columnTopLevel.AsElementId());
@@ -144,6 +154,13 @@ namespace AchingRevitAddIn
                 using (Transaction trans = new Transaction(doc))
                 {
                     trans.Start("Replicate 'Mark' parameter");
+
+                    // Remove warnings
+                    FailureHandlingOptions failureHandlingOptions = trans.GetFailureHandlingOptions();
+                    FailureHandler failureHandler = new FailureHandler();
+                    failureHandlingOptions.SetFailuresPreprocessor(failureHandler);
+                    failureHandlingOptions.SetClearAfterRollback(true);
+                    trans.SetFailureHandlingOptions(failureHandlingOptions);
 
                     if (allColumnsOnTopLevel != null)
                     {
@@ -155,19 +172,20 @@ namespace AchingRevitAddIn
 
                             if (columnLocation.IsAlmostEqualTo(referenceColumnLocation, 0.001))
                             {
-                                p.Set(referenceColumnMark.ToString());
-                                //newReferenceColumn = column;
+                                p.Set(referenceColumnMark);
+                                newReferenceColumn = column;
+                                break;
                             }
                         }
-                        //referenceColumn = newReferenceColumn;
 
+                        referenceColumn = newReferenceColumn;
                     }
                     else
                     {
                         referenceColumn = null;
                     }
 
-                    trans.Commit();
+                    trans.Commit(failureHandlingOptions);
                 }
             }
         }

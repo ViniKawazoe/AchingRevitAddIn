@@ -57,7 +57,7 @@
                 <Button x:Name="CancelButton" Click="CancelButton_Click" Grid.Column="1" Content="Cancel" Margin="5 0 0 0"/>
             </Grid>
 
-            <Image Width="170" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-3 10 0 0" Source="/Images/Icons/AA-LOGO_CompridoTransparente.png"/>
+            <Image Width="170" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-3 10 0 0" Source="pack://application,,,/Images/AA-LOGO_CompridoTransparente.png"/>
 
         </StackPanel>
     </Border>
