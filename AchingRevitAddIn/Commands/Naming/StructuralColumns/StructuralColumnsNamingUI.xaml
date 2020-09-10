@@ -6,14 +6,14 @@
             xmlns:local="clr-namespace:AchingRevitAddIn"
             mc:Ignorable="d"
             Title="Structural Column Naming"
-            Height="255"
+            Height="195"
             Width="250"
             FontSize="12"
             ResizeMode="NoResize"
             WindowStartupLocation="CenterOwner">
     <Border Padding="10">
         <StackPanel>
-
+            
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -22,21 +22,21 @@
 
                 <!-- Set the prefix -->
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="Column prefix:" Margin="0 0 5 0"/>
-                    <TextBox x:Name="PrefixText"  Margin="0 0 5 0" Padding="2"/>
+                    <TextBlock Text="Prefix:" Margin="0 0 5 0"/>
+                    <TextBox x:Name="PrefixText"  Margin="0 0 5 0" Padding="3"/>
                 </StackPanel>
 
                 <!-- Set the initial number -->
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Initial number:" Margin="5 0 0 0"/>
-                    <TextBox x:Name="InitialNumberText" Margin="5 0 0 0" Padding="2"/>
+                    <TextBox x:Name="InitialNumberText" Margin="5 0 0 0" Padding="3"/>
                 </StackPanel>
 
             </Grid>
 
             <!-- Set the order to which the columns will be named -->
             <TextBlock Text="Sort by:" Margin="0 5 0 0"/>
-            <ComboBox x:Name="SortDropdown" SelectedIndex="0" Padding="3">
+            <ComboBox x:Name="SortDropdown" SelectedIndex="0" Padding="5">
                 <ComboBoxItem>Top > Bottom | Left > Right</ComboBoxItem>
                 <ComboBoxItem>Top > Bottom | Right > Left</ComboBoxItem>
                 <ComboBoxItem>Bottom > Top | Left > Right</ComboBoxItem>
@@ -44,7 +44,7 @@
             </ComboBox>
 
             <!-- Replicate the names the columns to the columns in the same projection -->
-            <CheckBox x:Name="ReplicateCheckBox" Content="Replicate to aligned columns" Margin="0 10"/>
+            <CheckBox x:Name="ReplicateCheckBox" Content="Replicate above" Margin="0 10"/>
 
             <!-- Select and Cancel Buttons -->
             <Grid>
@@ -53,11 +53,9 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="SelectColumnsButton" Click="SelectColumnsButton_Click" Grid.Column="0" Content="Select columns" Margin="0 0 5 0"/>
-                <Button x:Name="CancelButton" Click="CancelButton_Click" Grid.Column="1" Content="Cancel" Margin="5 0 0 0"/>
+                <Button x:Name="SelectColumnsButton" Click="SelectColumnsButton_Click" Grid.Column="0" Content="Select columns" Margin="0 0 5 0" Padding="3"/>
+                <Button x:Name="CancelButton" Click="CancelButton_Click" Grid.Column="1" Content="Cancel" Margin="5 0 0 0" Padding="3"/>
             </Grid>
-
-            <Image Width="170" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-3 10 0 0" Source="pack://application,,,/Images/AA-LOGO_CompridoTransparente.png"/>
 
         </StackPanel>
     </Border>

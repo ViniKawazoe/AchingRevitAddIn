@@ -99,19 +99,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\Icons\AA-LOGO.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Images\Icons\AA-LOGO.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\Icons\AA-LOGO.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Images\Icons\AA-LOGO.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\AA-LOGO_CompridoTransparente.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Images\AA-LOGO_CompridoTransparente.png" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Commands\Naming\StructuralColumns\StructuralColumnsNamingUI.xaml">
@@ -120,21 +114,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\Icons\FloorNamingImage.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Images\Icons\StrColumnNamingImage.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Images\Icons\StrFoundationNamingImage.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Images\Icons\StrFramingNamingImage.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Images\Icons\Icon1.ico" />
+    <EmbeddedResource Include="Images\Icons\FloorNamingImage.png" />
+    <EmbeddedResource Include="Images\Icons\StrColumnNamingImage.png" />
+    <EmbeddedResource Include="Images\Icons\StrFoundationNamingImage.png" />
+    <EmbeddedResource Include="Images\Icons\StrFramingNamingImage.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
