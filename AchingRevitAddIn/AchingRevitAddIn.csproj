@@ -88,7 +88,11 @@
     </Compile>
     <Compile Include="Commands\Naming\StructuralFoundation\StructuralFoundationNaming.cs" />
     <Compile Include="Commands\Naming\StructuralFraming\StructuralFramingNaming.cs" />
+    <Compile Include="Commands\Naming\StructuralFraming\StructuralFramingNamingUI.xaml.cs">
+      <DependentUpon>StructuralFramingNamingUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Filters\StructuralColumnFilter.cs" />
+    <Compile Include="Filters\StructuralFramingFilter.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\ResourceAssembly.cs" />
@@ -99,16 +103,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\Icons\AA-LOGO.png" />
+    <Resource Include="Images\Icons\AA-LOGO.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\Icons\AA-LOGO.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Images\AA-LOGO_CompridoTransparente.png" />
+    <Resource Include="Images\Icons\AA-LOGO.ico" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Commands\Naming\StructuralColumns\StructuralColumnsNamingUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Commands\Naming\StructuralFraming\StructuralFramingNamingUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -118,6 +123,13 @@
     <EmbeddedResource Include="Images\Icons\StrColumnNamingImage.png" />
     <EmbeddedResource Include="Images\Icons\StrFoundationNamingImage.png" />
     <EmbeddedResource Include="Images\Icons\StrFramingNamingImage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Icons\AchingIcon16x16.ico" />
+    <Resource Include="Images\Icons\AchingIcon32x32.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\AchingLogo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

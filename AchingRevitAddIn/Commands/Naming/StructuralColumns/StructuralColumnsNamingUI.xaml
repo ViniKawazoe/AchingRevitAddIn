@@ -5,9 +5,10 @@
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
             xmlns:local="clr-namespace:AchingRevitAddIn"
             mc:Ignorable="d"
+            Icon="/AchingRevitAddIn;component/Images/Icons/AchingIcon16x16.ico"
             Title="Structural Column Naming"
-            Height="195"
-            Width="250"
+            Height="340"
+            Width="300"
             FontSize="12"
             ResizeMode="NoResize"
             WindowStartupLocation="CenterOwner">
@@ -23,26 +24,57 @@
                 <!-- Set the prefix -->
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Prefix:" Margin="0 0 5 0"/>
-                    <TextBox x:Name="PrefixText"  Margin="0 0 5 0" Padding="3"/>
+                    <TextBox x:Name="PrefixText"  Margin="0 0 5 10" Padding="3"/>
                 </StackPanel>
 
                 <!-- Set the initial number -->
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Initial number:" Margin="5 0 0 0"/>
-                    <TextBox x:Name="InitialNumberText" Margin="5 0 0 0" Padding="3"/>
+                    <TextBox x:Name="InitialNumberText" Margin="5 0 0 10" Padding="3"/>
                 </StackPanel>
 
             </Grid>
 
-            <!-- Set the order to which the columns will be named -->
-            <TextBlock Text="Sort by:" Margin="0 5 0 0"/>
-            <ComboBox x:Name="SortDropdown" SelectedIndex="0" Padding="5">
-                <ComboBoxItem>Top > Bottom | Left > Right</ComboBoxItem>
-                <ComboBoxItem>Top > Bottom | Right > Left</ComboBoxItem>
-                <ComboBoxItem>Bottom > Top | Left > Right</ComboBoxItem>
-                <ComboBoxItem>Bottom > Top | Right > Left</ComboBoxItem>
-            </ComboBox>
+            <Line
+                X1="5" Y1="0" 
+                X2="270" Y2="0" 
+                Stroke="LightGray" 
+                StrokeThickness="1"/>
 
+            <!-- Set the order to which the columns will be named -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.45*"/>
+                    <ColumnDefinition Width="0.1*"/>
+                    <ColumnDefinition Width="0.45*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0 5 0 0">
+                    <TextBlock Text="Sort vertical:"/>
+                    <ComboBox x:Name="SortVertical" SelectedIndex="0" Padding="5" Margin="0 0 0 10">
+                        <ComboBoxItem>Descending</ComboBoxItem>
+                        <ComboBoxItem>Ascending</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+
+                <TextBlock Grid.Column="1" Text="&amp;" VerticalAlignment="Bottom" HorizontalAlignment="Center" Padding="15"/>
+
+                <StackPanel Grid.Column="2" Margin="0 5 0 0">
+                    <TextBlock Text="Sort horizontal:"/>
+                    <ComboBox x:Name="SortHorizontal" SelectedIndex="0" Padding="5" Margin="0 0 0 10">
+                        <ComboBoxItem>Left &gt; Right</ComboBoxItem>
+                        <ComboBoxItem>Left &lt; Right</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+
+            </Grid>
+
+            <Line
+                X1="5" Y1="0" 
+                X2="270" Y2="0" 
+                Stroke="LightGray" 
+                StrokeThickness="1"/>
+            
             <!-- Replicate the names the columns to the columns in the same projection -->
             <CheckBox x:Name="ReplicateCheckBox" Content="Replicate above" Margin="0 10"/>
 
@@ -53,9 +85,11 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="SelectColumnsButton" Click="SelectColumnsButton_Click" Grid.Column="0" Content="Select columns" Margin="0 0 5 0" Padding="3"/>
-                <Button x:Name="CancelButton" Click="CancelButton_Click" Grid.Column="1" Content="Cancel" Margin="5 0 0 0" Padding="3"/>
+                <Button x:Name="SelectColumnsButton" Click="SelectColumnsButton_Click" Grid.Column="0" Content="Select columns" Margin="0 0 5 0" Padding="5" FontWeight="Bold"/>
+                <Button x:Name="CancelButton" Click="CancelButton_Click" Grid.Column="1" Content="Cancel" Margin="5 0 0 0" Padding="5"/>
             </Grid>
+
+            <Image Source="/AchingRevitAddIn;component/Images/AchingLogo.png" Margin="0 10 0 0"/>
 
         </StackPanel>
     </Border>

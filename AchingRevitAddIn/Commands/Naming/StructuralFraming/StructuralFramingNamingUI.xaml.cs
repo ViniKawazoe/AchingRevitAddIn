@@ -6,38 +6,35 @@ using System.Windows;
 namespace AchingRevitAddIn
 {
     /// <summary>
-    /// Interaction logic for StructuralColumnNamingUI.xaml
+    /// Interaction logic for StructuralFramingNamingUI.xaml
     /// </summary>
-    public partial class StructuralColumnNamingUI : Window, IDisposable
+    public partial class StructuralFramingNamingUI : Window, IDisposable
     {
-        public StructuralColumnNamingUI()
+        public StructuralFramingNamingUI()
         {
             InitializeComponent();
         }
 
-        private void SelectColumnsButton_Click(object sender, RoutedEventArgs e)
+        private void SelectFramingsButton_Click(object sender, RoutedEventArgs e)
         {
             if (PrefixText.Text != "" && InitialNumberText.Text != "")
             {
-                ///Sets the prefix of the columns names
+                ///Sets the prefix of the beams names
                 string prefix = PrefixText.Text;
-                ///Sets the initial number of the columns names
+                ///Sets the initial number of the beams names
                 int initialNumber = int.Parse(InitialNumberText.Text);
                 ///Sets the order to which the method will organize the names
                 int indexVertical = SortVertical.SelectedIndex;
                 int indexHorizontal = SortHorizontal.SelectedIndex;
-                ///Choose if the created names are going to be replicated to the aligned columns
-                bool checkbox = (bool) ReplicateCheckBox.IsChecked;
 
                 this.Close();
-                StructuralColumnsNaming.NameColumns(prefix, initialNumber, indexVertical, indexHorizontal, checkbox);
+                StructuralFramingNaming.NameFramings(prefix, initialNumber, indexVertical, indexHorizontal);
             }
             else
             {
                 string message = "Please select a prefix and initial number.";
                 MessageBox.Show(message, "Missing information");
             }
-            
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

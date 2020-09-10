@@ -43,7 +43,7 @@ namespace AchingRevitAddIn
         /// <param name="uidoc"></param>
         /// <param name="prefix"></param>
         /// <param name="initialNumber"></param>
-        static internal void NameColumns(string prefix, int initialNumber, int sortIndex, bool replicate)
+        static internal void NameColumns(string prefix, int initialNumber, int sortVertical, int sortHorizontal, bool replicate)
         {
             try
             {
@@ -62,23 +62,23 @@ namespace AchingRevitAddIn
 
                 IList<Element> sortedStrColumns = null;
 
-                // Order the structural columns by location
-                if (sortIndex == 0)
+                // Sort the structural columns by location
+                if (sortVertical == 0 && sortHorizontal == 0)
                 {
                     sortedStrColumns = strColumns.OrderByDescending(x => (x.Location as LocationPoint).Point.Y)
                         .ThenBy(x => (x.Location as LocationPoint).Point.X).ToList();
                 }
-                if (sortIndex == 1)
+                if (sortVertical == 0 && sortHorizontal == 1)
                 {
                     sortedStrColumns = strColumns.OrderByDescending(x => (x.Location as LocationPoint).Point.Y)
                         .ThenByDescending(x => (x.Location as LocationPoint).Point.X).ToList();
                 }
-                if (sortIndex == 2)
+                if (sortVertical == 1 && sortHorizontal == 0)
                 {
                     sortedStrColumns = strColumns.OrderBy(x => (x.Location as LocationPoint).Point.Y)
                         .ThenBy(x => (x.Location as LocationPoint).Point.X).ToList();
                 }
-                if (sortIndex == 3)
+                if (sortVertical == 1 && sortHorizontal == 1)
                 {
                     sortedStrColumns = strColumns.OrderBy(x => (x.Location as LocationPoint).Point.Y)
                         .ThenByDescending(x => (x.Location as LocationPoint).Point.X).ToList();
