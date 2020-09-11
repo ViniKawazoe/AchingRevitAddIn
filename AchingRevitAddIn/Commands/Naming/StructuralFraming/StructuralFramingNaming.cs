@@ -64,37 +64,45 @@ namespace AchingRevitAddIn
                 IList<Element> horizontalFramings = null;
                 IList<Element> verticalFramings = null;
 
-                Options Op = app.Create.NewGeometryOptions();
-                Op.ComputeReferences = true;
-                Op.IncludeNonVisibleObjects = true;
-                Op.View = doc.ActiveView;
-
-                string s = "";
-                int count = 1;
                 // Separate horizontal and vertical beams 
-                foreach (Element b in strFramings)
+                foreach (Element beam in strFramings)
                 {
                     IList<Curve> curves = new List<Curve>();
-                    XYZ startPoint = ((LocationCurve)b.Location).Curve.GetEndPoint(0);
-                    XYZ endPoint = ((LocationCurve)b.Location).Curve.GetEndPoint(1);
+                    XYZ startPoint = ((LocationCurve)beam.Location).Curve.GetEndPoint(0);
+                    XYZ endPoint = ((LocationCurve)beam.Location).Curve.GetEndPoint(1);
 
-                    
-                    s = s + "Beam " + count 
-                        + "\n"
-                        + "Start point: " + startPoint.ToString()
-                        + "\n"
-                        + "End point: " + endPoint.ToString()
-                        + "\n"
-                        + "------------------------------------------"
-                        + "\n";
+                    XYZ vector = (endPoint - startPoint).Normalize();
 
-                    count++;
+                    if (vector.X >= vector.Y)
+                    {
+                        horizontalFramings.Add(beam);
+                    }
+                    else
+                    {
+                        verticalFramings.Add(beam);
+                    }
                 }
-                TaskDialog.Show("Points", s);
+
+                // Grouping the beams
+                if (horizontalFramings != null)
+                {
+                    // Group the continuous beams
+                }
+
+                if (verticalFramings != null)
+                {
+                    // Group the continuous beams
+                }
             }
             catch
             {
             }
+        }
+
+        static internal IList<Element> GroupBeams(IList<Element> beamList)
+        {
+            IList<Element> list = null;
+            return list;
         }
 
         #endregion
