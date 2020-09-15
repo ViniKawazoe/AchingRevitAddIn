@@ -89,54 +89,59 @@ namespace AchingRevitAddIn
                 }
 
                 // Sort by center point
-                SortFramings(horizontalFramings, verticalFramings, sortHorizontal, sortVertical);
+                IList<Element> sortedHorizontalFramings = new List<Element>();
+                IList<Element> sortedVerticalFramings = new List<Element>();
+
+                if (horizontalFramings != null)
+                {
+                    sortedHorizontalFramings = SortHorizontalFramings(horizontalFramings, sortHorizontal, sortVertical);
+                }
+                if (verticalFramings != null)
+                {
+                    sortedVerticalFramings = SortVerticalFramings(verticalFramings, sortHorizontal, sortVertical);
+                }
 
                 // Join both lists
                 IList<Element> sortedFramings = new List<Element>();
 
-                if (horizontalFramings != null)
+                if (sortedHorizontalFramings != null)
                 {
-                    foreach (Element framing in horizontalFramings)
+                    foreach (Element framing in sortedHorizontalFramings)
                     {
                         sortedFramings.Add(framing);
                     }
                 }
-                if (verticalFramings != null)
+                if (sortedVerticalFramings != null)
                 {
-                    foreach (Element framing in verticalFramings)
+                    foreach (Element framing in sortedVerticalFramings)
                     {
                         sortedFramings.Add(framing);
                     }
+                }
+
+                foreach (Element elem in sortedFramings)
+                {
+                    RotateFraming(elem);
                 }
 
                 string s = "";
                 int count = 1;
-                /*
                 foreach (Element fm in sortedFramings)
                 {
-                    s = s + "Framing " + count
-                        + "\n"
-                        + "Start point: " + ((LocationCurve)fm.Location).Curve.GetEndPoint(0).ToString()
-                        + "\n"
-                        + "Center point: " + ((LocationCurve)fm.Location).Curve.Evaluate(0.5, true).ToString()
-                        + "\n"
-                        + "SEnd point: " + ((LocationCurve)fm.Location).Curve.GetEndPoint(1).ToString()
-                        + "\n"
-                        + "-------------------------------------------------------"
-                        + "\n";
+                    XYZ startPoint = ((LocationCurve)fm.Location).Curve.GetEndPoint(0);
+                    XYZ middlePoint = ((LocationCurve)fm.Location).Curve.Evaluate(0.5, true);
+                    XYZ endPoint = ((LocationCurve)fm.Location).Curve.GetEndPoint(1);
+                    XYZ vector = (endPoint - startPoint).Normalize();
 
-                    count++;
-                }
-                */
-                for (int i = 0; i < sortedFramings.Count; i++)
-                {
                     s = s + "Framing " + count
                         + "\n"
-                        + "Start point: " + ((LocationCurve)sortedFramings[i].Location).Curve.GetEndPoint(0).ToString()
+                        + "Start point: " + startPoint.ToString()
                         + "\n"
-                        + "Center point: " + ((LocationCurve)sortedFramings[i].Location).Curve.Evaluate(0.5, true).ToString()
+                        + "Center point: " + middlePoint.ToString()
                         + "\n"
-                        + "SEnd point: " + ((LocationCurve)sortedFramings[i].Location).Curve.GetEndPoint(1).ToString()
+                        + "End point: " + endPoint.ToString()
+                        + "\n"
+                        + "Vector: " + vector.ToString()
                         + "\n"
                         + "-------------------------------------------------------"
                         + "\n";
@@ -152,77 +157,116 @@ namespace AchingRevitAddIn
         }
 
         /// <summary>
-        ///  Sort framings
+        /// Sort horizontal framings
         /// </summary>
         /// <param name="horizontalFramings"></param>
-        /// <param name="verticalFramings"></param>
         /// <param name="sortHorizontal"></param>
         /// <param name="sortVertical"></param>
-        static internal void SortFramings(IList<Element> horizontalFramings, IList<Element> verticalFramings, int sortHorizontal, int sortVertical)
+        /// <returns></returns>
+        static internal List<Element> SortHorizontalFramings(IList<Element> horizontalFramings, int sortHorizontal, int sortVertical)
         {
+            List<Element> sortedHorizontalFramings = null;
+
             if (sortVertical == 0 && sortHorizontal == 0)
             {
-                if (horizontalFramings != null)
-                {
-                    horizontalFramings.
-                        OrderByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
-                        ThenBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X);
-                }
-
-                if (verticalFramings != null)
-                {
-                    verticalFramings.
-                        OrderBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
-                        ThenBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y);
-                }
+                sortedHorizontalFramings = horizontalFramings.
+                    OrderByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
+                    ThenBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
+                    ToList();
             }
             if (sortVertical == 0 && sortHorizontal == 1)
             {
-                if (horizontalFramings != null)
-                {
-                    horizontalFramings.
-                        OrderByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
-                        ThenByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X);
-                }
-
-                if (verticalFramings != null)
-                {
-                    verticalFramings.
-                        OrderBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
-                        ThenByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y);
-                }
+                sortedHorizontalFramings = horizontalFramings.
+                    OrderByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
+                    ThenByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
+                    ToList();
             }
             if (sortVertical == 1 && sortHorizontal == 0)
             {
-                if (horizontalFramings != null)
-                {
-                    horizontalFramings.
-                        OrderBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
-                        ThenBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X);
-                }
-
-                if (verticalFramings != null)
-                {
-                    verticalFramings.
-                        OrderByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
-                        ThenBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y);
-                }
+                sortedHorizontalFramings = horizontalFramings.
+                    OrderBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
+                    ThenBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
+                    ToList();
             }
             if (sortVertical == 1 && sortHorizontal == 1)
             {
-                if (horizontalFramings != null)
+                sortedHorizontalFramings = horizontalFramings.
+                    OrderBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
+                    ThenByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
+                    ToList();
+            }
+
+            return sortedHorizontalFramings;
+        }
+
+        /// <summary>
+        /// Sort vertical framings
+        /// </summary>
+        /// <param name="verticalFramings"></param>
+        /// <param name="sortHorizontal"></param>
+        /// <param name="sortVertical"></param>
+        /// <returns></returns>
+        static internal List<Element> SortVerticalFramings(IList<Element> verticalFramings, int sortHorizontal, int sortVertical)
+        {
+            List<Element> sortedVerticalFramings = null;
+
+            if (sortVertical == 0 && sortHorizontal == 0)
+            {
+                sortedVerticalFramings = verticalFramings.
+                    OrderBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
+                    ThenBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
+                    ToList();
+            }
+            if (sortVertical == 0 && sortHorizontal == 1)
+            {
+                sortedVerticalFramings = verticalFramings.
+                    OrderBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
+                    ThenByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
+                    ToList();
+            }
+            if (sortVertical == 1 && sortHorizontal == 0)
+            {
+                sortedVerticalFramings = verticalFramings.
+                    OrderByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
+                    ThenBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
+                    ToList();
+            }
+            if (sortVertical == 1 && sortHorizontal == 1)
+            {
+                sortedVerticalFramings = verticalFramings.
+                    OrderByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
+                    ThenByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
+                    ToList();
+            }
+
+            return sortedVerticalFramings;
+        }
+
+        static internal void RotateFraming(Element framing)
+        {
+            using (Transaction trans = new Transaction(Uidoc.Document))
+            {
+                trans.Start("Rotate element");
+
+                LocationCurve curve = framing.Location as LocationCurve;
+                XYZ startPoint = curve.Curve.GetEndPoint(0);
+                XYZ middlePoint = curve.Curve.Evaluate(0.5, true);
+                XYZ endPoint = curve.Curve.GetEndPoint(1);
+                XYZ middleHigh = middlePoint.Add(XYZ.BasisZ);
+                Line axisLine = Line.CreateBound(middlePoint, middleHigh);
+
+                XYZ vector = (endPoint - startPoint).Normalize();
+
+                double vectorX = vector.X;
+                double vectorY = vector.Y;
+
+                if ((vectorX == 0 && vectorY < 0) || (vectorX < 0 && vectorY == 0))
                 {
-                    horizontalFramings.
-                        OrderBy(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y).
-                        ThenByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X);
+                    //curve.Rotate(axisLine, Math.PI);
+                    ((LocationCurve)framing.Location).Rotate(axisLine, Math.PI);
                 }
 
-                if (verticalFramings != null)
-                {
-                    verticalFramings.
-                        OrderByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X).
-                        ThenByDescending(k => ((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y);
-                }
+                trans.Commit();
             }
         }
 
