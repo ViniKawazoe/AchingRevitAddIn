@@ -5,6 +5,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
+using System;
 #endregion
 
 namespace AchingRevitAddIn
@@ -65,23 +66,31 @@ namespace AchingRevitAddIn
                 // Sort the structural columns by location
                 if (sortVertical == 0 && sortHorizontal == 0)
                 {
-                    sortedStrColumns = strColumns.OrderByDescending(x => (x.Location as LocationPoint).Point.Y)
-                        .ThenBy(x => (x.Location as LocationPoint).Point.X).ToList();
+                    sortedStrColumns = strColumns
+                        .OrderByDescending(x => Math.Round((x.Location as LocationPoint).Point.Y, 5))
+                        .ThenBy(x => Math.Round((x.Location as LocationPoint).Point.X, 5))
+                        .ToList();
                 }
                 if (sortVertical == 0 && sortHorizontal == 1)
                 {
-                    sortedStrColumns = strColumns.OrderByDescending(x => (x.Location as LocationPoint).Point.Y)
-                        .ThenByDescending(x => (x.Location as LocationPoint).Point.X).ToList();
+                    sortedStrColumns = strColumns
+                        .OrderByDescending(x => Math.Round((x.Location as LocationPoint).Point.Y, 5))
+                        .ThenByDescending(x => Math.Round((x.Location as LocationPoint).Point.X, 5))
+                        .ToList();
                 }
                 if (sortVertical == 1 && sortHorizontal == 0)
                 {
-                    sortedStrColumns = strColumns.OrderBy(x => (x.Location as LocationPoint).Point.Y)
-                        .ThenBy(x => (x.Location as LocationPoint).Point.X).ToList();
+                    sortedStrColumns = strColumns
+                        .OrderBy(x => Math.Round((x.Location as LocationPoint).Point.Y, 5))
+                        .ThenBy(x => Math.Round((x.Location as LocationPoint).Point.X, 5))
+                        .ToList();
                 }
                 if (sortVertical == 1 && sortHorizontal == 1)
                 {
-                    sortedStrColumns = strColumns.OrderBy(x => (x.Location as LocationPoint).Point.Y)
-                        .ThenByDescending(x => (x.Location as LocationPoint).Point.X).ToList();
+                    sortedStrColumns = strColumns
+                        .OrderBy(x => Math.Round((x.Location as LocationPoint).Point.Y, 5))
+                        .ThenByDescending(x => Math.Round((x.Location as LocationPoint).Point.X, 5))
+                        .ToList();
                 }
 
                 using (Transaction trans = new Transaction(doc))
