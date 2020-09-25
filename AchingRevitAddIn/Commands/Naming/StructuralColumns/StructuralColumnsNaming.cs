@@ -107,12 +107,12 @@ namespace AchingRevitAddIn
 
                     foreach (Element strColumn in sortedStrColumns)
                     {
-                        Parameter p = strColumn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+                        Parameter mark = strColumn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
 
                         GenerateName generatedName = new GenerateName();
                         string name = generatedName.Name(initialNumber, prefix, sortedStrColumns.Count);
 
-                        p.Set(name);
+                        mark.Set(name);
                         initialNumber++;
                     }
 

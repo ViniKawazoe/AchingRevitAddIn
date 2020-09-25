@@ -11,6 +11,7 @@ using Autodesk.Revit.UI.Selection;
 using AchingRevitAddIn.Filters;
 using Autodesk.Revit.ApplicationServices;
 using System.Net;
+using System.Text.RegularExpressions;
 #endregion
 
 namespace AchingRevitAddIn
@@ -159,7 +160,7 @@ namespace AchingRevitAddIn
                 {
                     groupedHorizontalFramings = GroupHorizontalFramings(horizontalFramings, sortHorizontal, sortVertical);
 
-                    foreach (IGrouping<double, Element> group in groupedHorizontalFramings)
+                    foreach (var group in groupedHorizontalFramings)
                     {
                         groupedFramings.Add(group);
                     }
@@ -168,15 +169,79 @@ namespace AchingRevitAddIn
                 {
                     groupedVerticalFramings = GroupVerticalFramings(verticalFramings, sortHorizontal, sortVertical);
 
-                    foreach (IGrouping<double, Element> group in groupedVerticalFramings)
+                    foreach (var group in groupedVerticalFramings)
                     {
                         groupedFramings.Add(group);
                     }
                 }
 
-                // Name framings
+                // Get total number of beams
+                int totalNumberOfBeams = 0;
+
+                foreach (var group in groupedFramings)
+                {
+                    foreach (Element elem in group)
+                    {
+                        totalNumberOfBeams++;
+                    }
+                }
+
+                using (Transaction trans = new Transaction(doc))
+                {
+                    trans.Start("Set 'Mark' parameter");
+
+                    // Remove warnings
+                    FailureHandlingOptions failureHandlingOptions = trans.GetFailureHandlingOptions();
+                    FailureHandler failureHandler = new FailureHandler();
+                    failureHandlingOptions.SetFailuresPreprocessor(failureHandler);
+                    failureHandlingOptions.SetClearAfterRollback(true);
+                    trans.SetFailureHandlingOptions(failureHandlingOptions);
+
+                    // Name beams
+                    char[] letters = Enumerable.Range('A', 'Z' - 'A' + 1).Select(i => (Char)i).ToArray();
+
+                    foreach (var group in groupedFramings)
+                    {
+                        if (group.Count() < 2)
+                        {
+                            Element beam = group.ToList()[0];
+                            Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                            GenerateName generatedName = new GenerateName();
+                            string name = generatedName.Name(initialNumber, prefix, totalNumberOfBeams);
+
+                            mark.Set(name);
+                            initialNumber++;
+                        }
+                        else
+                        {
+                            for (int i = 0; i < group.Count(); i++)
+                            {
+                                // If it is the last item
+                                if (i == group.Count() - 1)
+                                {
+
+                                }
+                                else
+                                {
+                                    Element currentBeam = group.ToList()[i];
+                                    XYZ startPointCB = ((LocationCurve)currentBeam.Location).Curve.GetEndPoint(0);
+                                    XYZ endPointCB = ((LocationCurve)currentBeam.Location).Curve.GetEndPoint(1);
+
+                                    Element nextBeam = group.ToList()[i + 1];
+                                    XYZ starPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(0);
+                                    XYZ endPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(1);
 
 
+                                }
+                            }
+                        }
+                    }
+
+                    trans.Commit();
+                }
+
+                /*
                 string s = "";
                 int count = 1;
 
@@ -209,6 +274,7 @@ namespace AchingRevitAddIn
                 }
 
                 TaskDialog.Show("Framings", s);
+                */
             }
             catch
             {
