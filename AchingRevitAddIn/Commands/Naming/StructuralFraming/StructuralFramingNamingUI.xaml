@@ -64,7 +64,7 @@
                         <TextBlock Text="Sort horizontal:"/>
                         <ComboBox x:Name="SortHorizontal" SelectedIndex="0" Padding="5" Margin="0 0 0 10">
                             <ComboBoxItem>Left &gt; Right</ComboBoxItem>
-                            <ComboBoxItem>Left &lt; Right</ComboBoxItem>
+                            <ComboBoxItem>Right &gt; Left</ComboBoxItem>
                         </ComboBox>
                     </StackPanel>
 

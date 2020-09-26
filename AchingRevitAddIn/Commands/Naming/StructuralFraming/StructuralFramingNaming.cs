@@ -90,67 +90,6 @@ namespace AchingRevitAddIn
                     }
                 }
 
-                /*
-                // Sort by center point
-                IList<Element> sortedHorizontalFramings = new List<Element>();
-                IList<Element> sortedVerticalFramings = new List<Element>();
-
-                if (horizontalFramings != null)
-                {
-                    sortedHorizontalFramings = SortHorizontalFramings(horizontalFramings, sortHorizontal, sortVertical);
-                }
-                if (verticalFramings != null)
-                {
-                    sortedVerticalFramings = SortVerticalFramings(verticalFramings, sortHorizontal, sortVertical);
-                }
-
-                // Join both lists
-                IList<Element> sortedFramings = new List<Element>();
-
-                if (sortedHorizontalFramings != null)
-                {
-                    foreach (Element framing in sortedHorizontalFramings)
-                    {
-                        sortedFramings.Add(framing);
-                    }
-                }
-                if (sortedVerticalFramings != null)
-                {
-                    foreach (Element framing in sortedVerticalFramings)
-                    {
-                        sortedFramings.Add(framing);
-                    }
-                }
-
-                // Using task dialog to show the order of the framings
-                string s = "";
-                int count = 1;
-                foreach (Element elem in sortedFramings)
-                {
-                    s = s + "Beam: " + count
-                        + "\n";
-
-                    XYZ startPoint = ((LocationCurve)elem.Location).Curve.GetEndPoint(0);
-                    XYZ middlePoint = ((LocationCurve)elem.Location).Curve.Evaluate(0.5, true);
-                    XYZ endPoint = ((LocationCurve)elem.Location).Curve.GetEndPoint(1);
-                    XYZ vector = (endPoint - startPoint).Normalize();
-
-                    s = s
-                        + " > Start point: " + startPoint.ToString()
-                        + "\n"
-                        + " > Middle point: " + middlePoint.ToString()
-                        + "\n"
-                        + " > End point: " + endPoint.ToString()
-                        + "\n"
-                        + " > Vector: " + vector.ToString()
-                        + "\n"
-                        + "-------------------------------------------------------"
-                        + "\n";
-
-                    count++;
-                }
-                */
-
                 // group by center point
                 List<IGrouping<double, Element>> groupedHorizontalFramings = new List<IGrouping<double, Element>>();
                 List<IGrouping<double, Element>> groupedVerticalFramings = new List<IGrouping<double, Element>>();
@@ -215,24 +154,139 @@ namespace AchingRevitAddIn
                         }
                         else
                         {
+                            int countLetters = 0;
+
                             for (int i = 0; i < group.Count(); i++)
                             {
-                                // If it is the last item
-                                if (i == group.Count() - 1)
-                                {
+                                Element currentBeam = group.ToList()[i];
+                                XYZ startPointCB = ((LocationCurve)currentBeam.Location).Curve.GetEndPoint(0);
+                                XYZ endPointCB = ((LocationCurve)currentBeam.Location).Curve.GetEndPoint(1);
 
-                                }
-                                else
+                                if (i == 0) // First item
                                 {
-                                    Element currentBeam = group.ToList()[i];
-                                    XYZ startPointCB = ((LocationCurve)currentBeam.Location).Curve.GetEndPoint(0);
-                                    XYZ endPointCB = ((LocationCurve)currentBeam.Location).Curve.GetEndPoint(1);
+                                    Element nextBeam = group.ToList()[i + 1];
+                                    XYZ starPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(0);
+                                    XYZ endPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(1);
+
+                                    if (startPointCB.IsAlmostEqualTo(starPointNB, 1) ||
+                                        startPointCB.IsAlmostEqualTo(endPointNB, 1) ||
+                                        endPointCB.IsAlmostEqualTo(starPointNB, 1) ||
+                                        endPointCB.IsAlmostEqualTo(endPointNB, 1))
+                                    {
+                                        Element beam = group.ToList()[i];
+                                        Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                                        GenerateName generatedName = new GenerateName();
+                                        string name = generatedName.Name(initialNumber, prefix, totalNumberOfBeams);
+
+                                        name = name + " " + letters[countLetters].ToString();
+                                        mark.Set(name);
+                                    }
+                                    else
+                                    {
+                                        initialNumber++;
+                                        Element beam = group.ToList()[i];
+                                        Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                                        GenerateName generatedName = new GenerateName();
+                                        string name = generatedName.Name(initialNumber, prefix, totalNumberOfBeams);
+
+                                        mark.Set(name);
+                                    }
+                                }
+                                else if (i == group.Count() - 1) // Last item
+                                {
+                                    Element previousBeam = group.ToList()[i - 1];
+                                    XYZ starPointPB = ((LocationCurve)previousBeam.Location).Curve.GetEndPoint(0);
+                                    XYZ endPointPB = ((LocationCurve)previousBeam.Location).Curve.GetEndPoint(1);
+
+                                    if (startPointCB.IsAlmostEqualTo(starPointPB, 1) ||
+                                        startPointCB.IsAlmostEqualTo(endPointPB, 1) ||
+                                        endPointCB.IsAlmostEqualTo(starPointPB, 1) ||
+                                        endPointCB.IsAlmostEqualTo(endPointPB, 1))
+                                    {
+                                        countLetters++;
+
+                                        Element beam = group.ToList()[i];
+                                        Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                                        GenerateName generatedName = new GenerateName();
+                                        string name = generatedName.Name(initialNumber, prefix, totalNumberOfBeams);
+
+                                        name = name + " " + letters[countLetters].ToString();
+                                        mark.Set(name);
+                                    }
+                                    else
+                                    {
+                                        initialNumber++;
+
+                                        Element beam = group.ToList()[i];
+                                        Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                                        GenerateName generatedName = new GenerateName();
+                                        string name = generatedName.Name(initialNumber, prefix, totalNumberOfBeams);
+
+                                        mark.Set(name);
+                                    }
+                                    initialNumber++;
+                                }
+                                else // Intermediate items
+                                {
+                                    Element previousBeam = group.ToList()[i - 1];
+                                    XYZ starPointPB = ((LocationCurve)previousBeam.Location).Curve.GetEndPoint(0);
+                                    XYZ endPointPB = ((LocationCurve)previousBeam.Location).Curve.GetEndPoint(1);
 
                                     Element nextBeam = group.ToList()[i + 1];
                                     XYZ starPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(0);
                                     XYZ endPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(1);
 
+                                    if (startPointCB.IsAlmostEqualTo(starPointPB, 1) ||
+                                        startPointCB.IsAlmostEqualTo(endPointPB, 1) ||
+                                        endPointCB.IsAlmostEqualTo(starPointPB, 1) ||
+                                        endPointCB.IsAlmostEqualTo(endPointPB, 1))
+                                    {
+                                        countLetters++;
 
+                                        Element beam = group.ToList()[i];
+                                        Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                                        GenerateName generatedName = new GenerateName();
+                                        string name = generatedName.Name(initialNumber, prefix, totalNumberOfBeams);
+
+                                        name = name + " " + letters[countLetters].ToString();
+                                        mark.Set(name);
+                                    }
+                                    else
+                                    {
+                                        initialNumber++;
+                                        countLetters = 0;
+
+                                        if (startPointCB.IsAlmostEqualTo(starPointNB, 1) ||
+                                        startPointCB.IsAlmostEqualTo(endPointNB, 1) ||
+                                        endPointCB.IsAlmostEqualTo(starPointNB, 1) ||
+                                        endPointCB.IsAlmostEqualTo(endPointNB, 1))
+                                        {
+                                            Element beam = group.ToList()[i];
+                                            Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                                            GenerateName generatedName = new GenerateName();
+                                            string name = generatedName.Name(initialNumber, prefix, totalNumberOfBeams);
+
+                                            name = name + " " + letters[countLetters].ToString();
+                                            mark.Set(name);
+                                        }
+                                        else
+                                        {
+                                            Element beam = group.ToList()[i];
+                                            Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
+
+                                            GenerateName generatedName = new GenerateName();
+                                            string name = generatedName.Name(initialNumber, prefix, totalNumberOfBeams);
+
+                                            mark.Set(name);
+                                        }
+
+                                    }
                                 }
                             }
                         }
@@ -240,41 +294,6 @@ namespace AchingRevitAddIn
 
                     trans.Commit();
                 }
-
-                /*
-                string s = "";
-                int count = 1;
-
-                foreach (IGrouping<double, Element> group in groupedFramings)
-                {
-                    s = s + "Key: " + group.Key
-                        + "\n";
-
-                    foreach (Element elem in group)
-                    {
-                        XYZ startPoint = ((LocationCurve)elem.Location).Curve.GetEndPoint(0);
-                        XYZ middlePoint = ((LocationCurve)elem.Location).Curve.Evaluate(0.5, true);
-                        XYZ endPoint = ((LocationCurve)elem.Location).Curve.GetEndPoint(1);
-                        XYZ vector = (endPoint - startPoint).Normalize();
-
-                        s = s
-                            + " > Start point: " + startPoint.ToString()
-                            + "\n"
-                            + " > Middle point: " + middlePoint.ToString()
-                            + "\n"
-                            + " > End point: " + endPoint.ToString()
-                            + "\n"
-                            + " > Vector: " + vector.ToString()
-                            + "\n"
-                            + "-------------------------------------------------------"
-                            + "\n";
-                    }
-
-                    count++;
-                }
-
-                TaskDialog.Show("Framings", s);
-                */
             }
             catch
             {
