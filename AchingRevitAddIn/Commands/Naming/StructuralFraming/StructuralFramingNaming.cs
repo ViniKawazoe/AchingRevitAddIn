@@ -168,10 +168,10 @@ namespace AchingRevitAddIn
                                     XYZ starPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(0);
                                     XYZ endPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(1);
 
-                                    if (startPointCB.IsAlmostEqualTo(starPointNB, 1) ||
-                                        startPointCB.IsAlmostEqualTo(endPointNB, 1) ||
-                                        endPointCB.IsAlmostEqualTo(starPointNB, 1) ||
-                                        endPointCB.IsAlmostEqualTo(endPointNB, 1))
+                                    if (startPointCB.IsAlmostEqualTo(starPointNB) ||
+                                        startPointCB.IsAlmostEqualTo(endPointNB) ||
+                                        endPointCB.IsAlmostEqualTo(starPointNB) ||
+                                        endPointCB.IsAlmostEqualTo(endPointNB))
                                     {
                                         Element beam = group.ToList()[i];
                                         Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
@@ -184,7 +184,6 @@ namespace AchingRevitAddIn
                                     }
                                     else
                                     {
-                                        initialNumber++;
                                         Element beam = group.ToList()[i];
                                         Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
 
@@ -200,10 +199,10 @@ namespace AchingRevitAddIn
                                     XYZ starPointPB = ((LocationCurve)previousBeam.Location).Curve.GetEndPoint(0);
                                     XYZ endPointPB = ((LocationCurve)previousBeam.Location).Curve.GetEndPoint(1);
 
-                                    if (startPointCB.IsAlmostEqualTo(starPointPB, 1) ||
-                                        startPointCB.IsAlmostEqualTo(endPointPB, 1) ||
-                                        endPointCB.IsAlmostEqualTo(starPointPB, 1) ||
-                                        endPointCB.IsAlmostEqualTo(endPointPB, 1))
+                                    if (startPointCB.IsAlmostEqualTo(starPointPB) ||
+                                        startPointCB.IsAlmostEqualTo(endPointPB) ||
+                                        endPointCB.IsAlmostEqualTo(starPointPB) ||
+                                        endPointCB.IsAlmostEqualTo(endPointPB))
                                     {
                                         countLetters++;
 
@@ -240,10 +239,10 @@ namespace AchingRevitAddIn
                                     XYZ starPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(0);
                                     XYZ endPointNB = ((LocationCurve)nextBeam.Location).Curve.GetEndPoint(1);
 
-                                    if (startPointCB.IsAlmostEqualTo(starPointPB, 1) ||
-                                        startPointCB.IsAlmostEqualTo(endPointPB, 1) ||
-                                        endPointCB.IsAlmostEqualTo(starPointPB, 1) ||
-                                        endPointCB.IsAlmostEqualTo(endPointPB, 1))
+                                    if (startPointCB.IsAlmostEqualTo(starPointPB) ||
+                                        startPointCB.IsAlmostEqualTo(endPointPB) ||
+                                        endPointCB.IsAlmostEqualTo(starPointPB) ||
+                                        endPointCB.IsAlmostEqualTo(endPointPB))
                                     {
                                         countLetters++;
 
@@ -260,11 +259,11 @@ namespace AchingRevitAddIn
                                     {
                                         initialNumber++;
                                         countLetters = 0;
-
-                                        if (startPointCB.IsAlmostEqualTo(starPointNB, 1) ||
-                                        startPointCB.IsAlmostEqualTo(endPointNB, 1) ||
-                                        endPointCB.IsAlmostEqualTo(starPointNB, 1) ||
-                                        endPointCB.IsAlmostEqualTo(endPointNB, 1))
+                                        
+                                        if (startPointCB.IsAlmostEqualTo(starPointNB) ||
+                                        startPointCB.IsAlmostEqualTo(endPointNB) ||
+                                        endPointCB.IsAlmostEqualTo(starPointNB) ||
+                                        endPointCB.IsAlmostEqualTo(endPointNB))
                                         {
                                             Element beam = group.ToList()[i];
                                             Parameter mark = beam.get_Parameter(BuiltInParameter.ALL_MODEL_MARK);
@@ -298,92 +297,6 @@ namespace AchingRevitAddIn
             catch
             {
             }
-        }
-
-        /// <summary>
-        /// Sort horizontal framings
-        /// </summary>
-        /// <param name="horizontalFramings"></param>
-        /// <param name="sortHorizontal"></param>
-        /// <param name="sortVertical"></param>
-        /// <returns></returns>
-        static internal List<Element> SortHorizontalFramings(IList<Element> horizontalFramings, int sortHorizontal, int sortVertical)
-        {
-            List<Element> sortedHorizontalFramings = null;
-
-            if (sortVertical == 0 && sortHorizontal == 0)
-            {
-                sortedHorizontalFramings = horizontalFramings
-                    .OrderByDescending(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y, 5))
-                    .ThenBy(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X, 5))
-                    .ToList();
-            }
-            if (sortVertical == 0 && sortHorizontal == 1)
-            {
-                sortedHorizontalFramings = horizontalFramings
-                    .OrderByDescending(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y, 5))
-                    .ThenByDescending(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X, 5))
-                    .ToList();
-            }
-            if (sortVertical == 1 && sortHorizontal == 0)
-            {
-                sortedHorizontalFramings = horizontalFramings
-                    .OrderBy(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y, 5))
-                    .ThenBy(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X, 5))
-                    .ToList();
-            }
-            if (sortVertical == 1 && sortHorizontal == 1)
-            {
-                sortedHorizontalFramings = horizontalFramings
-                    .OrderBy(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y, 5))
-                    .ThenByDescending(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X, 5))
-                    .ToList();
-            }
-
-            return sortedHorizontalFramings;
-        }
-
-        /// <summary>
-        /// Sort vertical framings
-        /// </summary>
-        /// <param name="verticalFramings"></param>
-        /// <param name="sortHorizontal"></param>
-        /// <param name="sortVertical"></param>
-        /// <returns></returns>
-        static internal List<Element> SortVerticalFramings(IList<Element> verticalFramings, int sortHorizontal, int sortVertical)
-        {
-            List<Element> sortedVerticalFramings = null;
-
-            if (sortVertical == 0 && sortHorizontal == 0)
-            {
-                sortedVerticalFramings = verticalFramings
-                    .OrderBy(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X, 5))
-                    .ThenBy(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y, 5))
-                    .ToList();
-            }
-            if (sortVertical == 0 && sortHorizontal == 1)
-            {
-                sortedVerticalFramings = verticalFramings
-                    .OrderBy(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X, 5))
-                    .ThenByDescending(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y, 5))
-                    .ToList();
-            }
-            if (sortVertical == 1 && sortHorizontal == 0)
-            {
-                sortedVerticalFramings = verticalFramings
-                    .OrderByDescending(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X, 5))
-                    .ThenBy(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y, 5))
-                    .ToList();
-            }
-            if (sortVertical == 1 && sortHorizontal == 1)
-            {
-                sortedVerticalFramings = verticalFramings
-                    .OrderByDescending(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).X, 5))
-                    .ThenByDescending(k => Math.Round(((LocationCurve)k.Location).Curve.Evaluate(0.5, true).Y, 5))
-                    .ToList();
-            }
-
-            return sortedVerticalFramings;
         }
 
         /// <summary>
