@@ -81,6 +81,9 @@
   <ItemGroup>
     <Compile Include="Commands\FailureHandler.cs" />
     <Compile Include="Commands\Naming\Floor\FloorNaming.cs" />
+    <Compile Include="Commands\Naming\Floor\FloorNamingUI.xaml.cs">
+      <DependentUpon>FloorNamingUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Commands\Naming\GenerateName.cs" />
     <Compile Include="Commands\Naming\StructuralColumns\StructuralColumnsNaming.cs" />
     <Compile Include="Commands\Naming\StructuralColumns\StructuralColumnsNamingUI.xaml.cs">
@@ -91,6 +94,7 @@
     <Compile Include="Commands\Naming\StructuralFraming\StructuralFramingNamingUI.xaml.cs">
       <DependentUpon>StructuralFramingNamingUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Filters\FloorFilter.cs" />
     <Compile Include="Filters\StructuralColumnFilter.cs" />
     <Compile Include="Filters\StructuralFramingFilter.cs" />
     <Compile Include="Main.cs" />
@@ -109,6 +113,10 @@
     <Resource Include="Images\Icons\AA-LOGO.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Commands\Naming\Floor\FloorNamingUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Commands\Naming\StructuralColumns\StructuralColumnsNamingUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
