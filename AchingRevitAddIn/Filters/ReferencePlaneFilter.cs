@@ -1,4 +1,4 @@
-﻿#region namespaces
+﻿#region namespace
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI.Selection;
 #endregion
@@ -6,13 +6,13 @@ using Autodesk.Revit.UI.Selection;
 namespace AchingRevitAddIn
 {
     /// <summary>
-    /// Filter the Structural Framing
+    /// Filter reference planes
     /// </summary>
-    class StructuralFramingFilter : ISelectionFilter
+    class ReferencePlaneFilter : ISelectionFilter
     {
         public bool AllowElement(Element elem)
         {
-            return elem.Category.Id.IntegerValue.Equals((int)BuiltInCategory.OST_StructuralFraming);
+            return elem.Category.Id.IntegerValue.Equals((int)BuiltInCategory.OST_CLines);
         }
 
         public bool AllowReference(Reference reference, XYZ position)

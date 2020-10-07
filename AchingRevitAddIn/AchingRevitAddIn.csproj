@@ -94,9 +94,12 @@
     <Compile Include="Commands\Naming\StructuralFraming\StructuralFramingNamingUI.xaml.cs">
       <DependentUpon>StructuralFramingNamingUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Commands\Split\SplitWalls.cs" />
     <Compile Include="Filters\FloorFilter.cs" />
+    <Compile Include="Filters\ReferencePlaneFilter.cs" />
     <Compile Include="Filters\StructuralColumnFilter.cs" />
     <Compile Include="Filters\StructuralFramingFilter.cs" />
+    <Compile Include="Filters\WallFilter.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\ResourceAssembly.cs" />

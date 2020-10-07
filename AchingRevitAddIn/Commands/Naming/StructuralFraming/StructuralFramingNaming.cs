@@ -6,7 +6,6 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
-using AchingRevitAddIn.Filters;
 using Autodesk.Revit.ApplicationServices;
 #endregion
 

@@ -43,15 +43,18 @@ namespace AchingRevitAddIn
             PushButtonData strFrmnNaming = new PushButtonData("StructuralFramingNamingButton", "Beams", path, "AchingRevitAddIn.StructuralFramingNaming");
             PushButtonData floorNaming = new PushButtonData("FloorNamingButton", "Floors", path, "AchingRevitAddIn.FloorNaming");
             PushButtonData strFndtnNaming = new PushButtonData("StructuralFoundationNamingButton", "Foundations", path, "AchingRevitAddIn.StructuralFoundationNaming");
+            PushButtonData splitWalls = new PushButtonData("splitWallsButton", "Split walls", path, "AchingRevitAddIn.SplitWalls");
             
             // Create a ribbon panel
             RibbonPanel namingPanel = application.CreateRibbonPanel(tabName, "Element Naming");
+            RibbonPanel modifyPanel = application.CreateRibbonPanel(tabName, "Modify Element");
 
             // Add buttons to the panel
             PushButton strColumnNamingButton = namingPanel.AddItem(strClmnNaming) as PushButton;
             PushButton strFrmnNamingButton = namingPanel.AddItem(strFrmnNaming) as PushButton;
             PushButton floorNamingButton = namingPanel.AddItem(floorNaming) as PushButton;
             PushButton strFndtnNamingButton = namingPanel.AddItem(strFndtnNaming) as PushButton;
+            PushButton splitWallsButton = modifyPanel.AddItem(splitWalls) as PushButton;
 
             // Add button image
             strColumnNamingButton.LargeImage = PngImageSource("StrColumnNamingImage.png");
