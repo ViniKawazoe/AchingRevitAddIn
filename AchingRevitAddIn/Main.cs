@@ -10,7 +10,6 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
 using System.Windows.Media.Imaging;
-using AchingRevitAddIn.Resources;
 using System.IO;
 using System.Windows.Media;
 #endregion

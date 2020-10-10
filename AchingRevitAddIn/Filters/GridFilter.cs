@@ -6,13 +6,13 @@ using Autodesk.Revit.UI.Selection;
 namespace AchingRevitAddIn
 {
     /// <summary>
-    /// Filter reference planes
+    /// Filter grids
     /// </summary>
-    class ReferencePlaneFilter : ISelectionFilter
+    class GridFilter : ISelectionFilter
     {
         public bool AllowElement(Element elem)
         {
-            return elem.Category.Id.IntegerValue.Equals((int)BuiltInCategory.OST_CLines);
+            return elem.Category.Id.IntegerValue.Equals((int)BuiltInCategory.OST_Grids);
         }
 
         public bool AllowReference(Reference reference, XYZ position)

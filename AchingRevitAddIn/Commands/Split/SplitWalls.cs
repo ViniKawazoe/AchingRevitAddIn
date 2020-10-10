@@ -6,6 +6,8 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
 using System.Windows;
+using Autodesk.Revit.Exceptions;
+using System;
 #endregion
 
 namespace AchingRevitAddIn
@@ -13,12 +15,16 @@ namespace AchingRevitAddIn
     [Transaction(TransactionMode.Manual)]
     class SplitWalls : IExternalCommand
     {
+        private static UIDocument Uidoc { get; set; }
+
         #region public methods
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             // Get UIDocument and Document
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            Document doc = uidoc.Document;
+
+            // Send it to the public variable so other methods can call it
+            Uidoc = uidoc;
 
             // Only allow view plans, 3D views, sections and elevations
             if (uidoc.ActiveView as ViewPlan == null &&
@@ -28,23 +34,33 @@ namespace AchingRevitAddIn
                 return Result.Failed;
             }
 
+            SpliWalls();
+
+            return Result.Succeeded;
+        }
+
+        static internal void SpliWalls()
+        {
             try
             {
+                UIDocument uidoc = Uidoc;
+                Document doc = uidoc.Document;
+
                 // Create filters
                 WallFilter wallFilter = new WallFilter();
-                ReferencePlaneFilter refPlaneFilter = new ReferencePlaneFilter();
+                GridFilter gridFilter = new GridFilter();
 
                 // Apply filter and select multiple walls
                 IList<Reference> wallPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, wallFilter, "Select walls");
 
-                // Apply filter and select multiple reference planes
-                //IList<Reference> refPlanePickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, refPlaneFilter, "Select reference planes");
+                // Apply filter and select multiple grids
+                IList<Reference> gridPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, gridFilter, "Select grids");
 
                 // Convert References to Elements
                 IList<Element> walls = wallPickedReferences.Select(x => doc.GetElement(x)).ToList();
-                //IList<Element> refPlanes = refPlanePickedReferences.Select(x => doc.GetElement(x)).ToList();
+                IList<Element> grids = gridPickedReferences.Select(x => doc.GetElement(x)).ToList();
 
-                using(Transaction trans = new Transaction(doc))
+                using (Transaction trans = new Transaction(doc))
                 {
                     trans.Start("Split walls");
 
@@ -58,8 +74,7 @@ namespace AchingRevitAddIn
                         double gap = 2.0;
                         double offset = gap / 2;
 
-                        //offset = offset / (12 * 2.54);
-                        UnitUtils.Convert(offset, DisplayUnitType.DUT_CENTIMETERS, DisplayUnitType.DUT_DECIMAL_FEET);
+                        offset = offset / (12 * 2.54);
 
                         // Consider splitting the wall in 4 parts
                         XYZ point1 = wallCurve.Evaluate(0.25, true);
@@ -110,8 +125,27 @@ namespace AchingRevitAddIn
             catch
             {
             }
+        }
 
-            return Result.Succeeded;
+        private XYZ GetIntersections(Line line1, Line line2)
+        {
+            IntersectionResultArray results;
+
+            SetComparisonResult result = line1.Intersect(line2, out results);
+
+            if (result != SetComparisonResult.Overlap)
+            {
+                throw new System.InvalidOperationException("Input lines do not intersect");
+            }
+
+            if (results == null || results.Size != 1)
+            {
+                throw new System.InvalidOperationException("Could not extract line intersection point");
+            }
+
+            IntersectionResult iResult = results.get_Item(0);
+
+            return iResult.XYZPoint;
         }
 
         #endregion
