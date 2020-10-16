@@ -1,0 +1,18 @@
+﻿<Window x:Class="AchingRevitAddIn.SplitWallsUI"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            xmlns:local="clr-namespace:AchingRevitAddIn"
+            mc:Ignorable="d" 
+            Icon="/AchingRevitAddIn;component/Images/Icons/AchingIcon16x16.ico"
+            Title="Split Walls"
+            Height="340"
+            Width="300"
+            FontSize="12"
+            ResizeMode="NoResize"
+            WindowStartupLocation="CenterOwner">
+    <Grid>
+            
+    </Grid>
+</Window>

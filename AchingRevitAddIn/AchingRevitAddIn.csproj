@@ -94,7 +94,10 @@
     <Compile Include="Commands\Naming\StructuralFraming\StructuralFramingNamingUI.xaml.cs">
       <DependentUpon>StructuralFramingNamingUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Commands\Split\SplitWalls.cs" />
+    <Compile Include="Commands\Split\SplitWalls\SplitWalls.cs" />
+    <Compile Include="Commands\Split\SplitWalls\SplitWallsUI.xaml.cs">
+      <DependentUpon>SplitWallsUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Filters\FloorFilter.cs" />
     <Compile Include="Filters\GridFilter.cs" />
     <Compile Include="Filters\StructuralColumnFilter.cs" />
@@ -124,6 +127,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Commands\Naming\StructuralFraming\StructuralFramingNamingUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Commands\Split\SplitWalls\SplitWallsUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
