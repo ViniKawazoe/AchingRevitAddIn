@@ -19,5 +19,15 @@ namespace AchingRevitAddIn
         {
             this.Close();
         }
+
+        private void SplitWallsButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

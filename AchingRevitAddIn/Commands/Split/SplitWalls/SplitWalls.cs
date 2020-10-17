@@ -36,7 +36,7 @@ namespace AchingRevitAddIn
 
             SplitWallsUI splitWallsUI = new SplitWallsUI();
             splitWallsUI.ShowDialog();
-            
+
             //SplitWall();
 
             return Result.Succeeded;
@@ -105,62 +105,130 @@ namespace AchingRevitAddIn
 
                             Line gridLine = Line.CreateBound(lineStartPoint, lineEndPoint);
 
-                            XYZ intersectionPoint = GetIntersections(wallCurve as Line, gridLine);
+                            XYZ intersectionPoint = new XYZ();
+
+                            try
+                            {
+                                intersectionPoint = GetIntersections(wallCurve as Line, gridLine);
+                            }
+                            catch
+                            {
+                                intersectionPoint = null;
+                            }
+
                             if (intersectionPoint != null)
                             {
                                 intersectionPoints.Add(intersectionPoint);
                             }
                         }
 
+                        // Sort the points according the curve's direction
+                        intersectionPoints = OrganizePointsAlongLine(wallCurve as Line, intersectionPoints);
+
                         if (intersectionPoints != null)
                         {
-                            for (int i = 0; i < intersectionPoints.Count; i++)
+                            if (intersectionPoints.Count == 1)
                             {
-                                if (intersectionPoints.Count == 1)
+                                Line line1 = Line.CreateBound(startPoint, intersectionPoints[0]);
+                                Line line2 = Line.CreateBound(intersectionPoints[0], endPoint);
+                                double line1Start = line1.GetEndParameter(0);
+                                double line1End = line1.GetEndParameter(1);
+                                double line2Start = line2.GetEndParameter(0);
+                                double line2End = line2.GetEndParameter(1);
+
+                                line1.MakeBound(line1Start, line1End - offset);
+                                line2.MakeBound(line2Start + offset, line2End);
+
+                                Wall wall2 = Wall.Create(doc, line2, wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
+                                Parameter topCons = wall2.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
+                                if (topCons != null)
                                 {
-                                    Line line1 = Line.CreateBound(startPoint, intersectionPoints[i]);
-                                    Line line2 = Line.CreateBound(intersectionPoints[i], endPoint);
-                                    double line1Start = line1.GetEndParameter(0);
-                                    double line1End = line1.GetEndParameter(1);
-                                    double line2Start = line2.GetEndParameter(0);
-                                    double line2End = line2.GetEndParameter(1);
-
-                                    line1.MakeBound(line1Start, line1End - offset);
-                                    line2.MakeBound(line2Start + offset, line2End);
-
-                                    Wall wall2 = Wall.Create(doc, line2, wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
-                                    Parameter topCons = wall2.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
-                                    if (topCons != null)
-                                    {
-                                        topCons.Set(topConstrain);
-                                    }
-                                    Parameter topOff = wall2.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
-                                    topOff.Set(topOffset);
-
-                                    ((LocationCurve)wall.Location).Curve = line1;
-                                    ((LocationCurve)wall2.Location).Curve = line2;
-
-                                    if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
-                                        WallUtils.DisallowWallJoinAtEnd(wall, 1);
-                                    if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 1))
-                                        WallUtils.DisallowWallJoinAtEnd(wall2, 1);
+                                    topCons.Set(topConstrain);
                                 }
-                                else
+                                Parameter topOff = wall2.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
+                                topOff.Set(topOffset);
+
+                                ((LocationCurve)wall.Location).Curve = line1;
+                                ((LocationCurve)wall2.Location).Curve = line2;
+
+                                if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+                                    WallUtils.DisallowWallJoinAtEnd(wall, 1);
+                                if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 1))
+                                    WallUtils.DisallowWallJoinAtEnd(wall2, 1);
+                            }
+                            else
+                            {
+                                IList<Line> lines = new List<Line>();
+
+                                for (int i = 0; i < intersectionPoints.Count; i++)
                                 {
                                     // First grid
                                     if (i == 0)
                                     {
+                                        // Create first line
+                                        Line line = Line.CreateBound(startPoint, intersectionPoints[i]);
+                                        double lineStart = line.GetEndParameter(0);
+                                        double lineEnd = line.GetEndParameter(1);
 
+                                        line.MakeBound(lineStart, lineEnd - offset);
+
+                                        // Create second line
+                                        Line line2 = Line.CreateBound(intersectionPoints[i], intersectionPoints[i + 1]);
+                                        double line2Start = line2.GetEndParameter(0);
+                                        double line2End = line2.GetEndParameter(1);
+
+                                        line2.MakeBound(line2Start + offset, line2End - offset);
+
+                                        lines.Add(line);
+                                        lines.Add(line2);
                                     }
                                     // Last grid
                                     else if (i == intersectionPoints.Count - 1)
                                     {
+                                        Line line = Line.CreateBound(intersectionPoints[i], endPoint);
+                                        double lineStart = line.GetEndParameter(0);
+                                        double lineEnd = line.GetEndParameter(1);
 
+                                        line.MakeBound(lineStart + offset, lineEnd);
+
+                                        lines.Add(line);
                                     }
                                     // Intermediate grids
                                     else
                                     {
+                                        Line line = Line.CreateBound(intersectionPoints[i], intersectionPoints[i + 1]);
+                                        double lineStart = line.GetEndParameter(0);
+                                        double lineEnd = line.GetEndParameter(1);
 
+                                        line.MakeBound(lineStart + offset, lineEnd - offset);
+
+                                        lines.Add(line);
+                                    }
+                                }
+
+                                for (int i = 0; i < lines.Count; i++)
+                                {
+                                    if (i == 0)
+                                    {
+                                        ((LocationCurve)wall.Location).Curve = lines[i];
+
+                                        if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+                                            WallUtils.DisallowWallJoinAtEnd(wall, 1);
+                                    }
+                                    else
+                                    {
+                                        Wall newWall = Wall.Create(doc, lines[i], wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
+
+                                        Parameter topCons = newWall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
+                                        if (topCons != null)
+                                        {
+                                            topCons.Set(topConstrain);
+                                        }
+                                        Parameter topOff = newWall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
+                                        topOff.Set(topOffset);
+
+                                        if (WallUtils.IsWallJoinAllowedAtEnd(newWall, 1))
+                                            WallUtils.DisallowWallJoinAtEnd(newWall, 1);
                                     }
                                 }
                             }
@@ -200,6 +268,94 @@ namespace AchingRevitAddIn
             IntersectionResult iResult = results.get_Item(0);
 
             return iResult.XYZPoint;
+        }
+
+        /// <summary>
+        /// Sort the points according to the curve's direction
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <param name="points"></param>
+        static internal IList<XYZ> OrganizePointsAlongLine(Line curve, IList<XYZ> points)
+        {
+            XYZ curveStartPoint = curve.GetEndPoint(0);
+            XYZ curveEndPoint = curve.GetEndPoint(1);
+
+            double startPointX = curveStartPoint.X;
+            double startPointY = curveStartPoint.Y;
+            double endPointX = curveEndPoint.X;
+            double endPointY = curveEndPoint.Y;
+
+            double deltaX = Math.Round(endPointX - startPointX, 5);
+            double deltaY = Math.Round(endPointY - startPointY, 5);
+
+            if (deltaX == 0 || deltaY == 0)
+            {
+                // The line is in the ordinate axis
+                if (deltaX == 0)
+                {
+                    // Upwards
+                    if (deltaY > 0)
+                    {
+                        points = points.OrderBy(point => point.Y)
+                            .ToList();
+                    }
+                    // Downwards
+                    else
+                    {
+                        points = points.OrderByDescending(point => point.Y)
+                            .ToList();
+                    }
+                }
+                // The line is in the abscissa axis
+                else
+                {
+                    // Left to Right
+                    if (deltaX > 0)
+                    {
+                        points = points.OrderBy(point => point.X)
+                            .ToList();
+                    }
+                    // Right to Left
+                    else
+                    {
+                        points = points.OrderByDescending(point => point.X)
+                            .ToList();
+                    }
+                }
+            }
+            else
+            {
+                // Left -> Right | Upwards
+                if (deltaX > 0 && deltaY > 0)
+                {
+                    points = points.OrderBy(point => point.X)
+                        .ThenBy(point => point.Y)
+                        .ToList();
+                }
+                // Right -> Left | Upwards
+                else if (deltaX < 0 && deltaY > 0)
+                {
+                    points = points.OrderByDescending(point => point.X)
+                        .ThenBy(point => point.Y)
+                        .ToList();
+                }
+                // Right -> Left | Downwards
+                else if (deltaX < 0 && deltaY < 0)
+                {
+                    points = points.OrderByDescending(point => point.X)
+                        .ThenByDescending(point => point.Y)
+                        .ToList();
+                }
+                // Left -> Right | Downwards
+                else if (deltaX > 0 && deltaY < 0)
+                {
+                    points = points.OrderBy(point => point.X)
+                        .ThenByDescending(point => point.Y)
+                        .ToList();
+                }
+            }
+
+            return points;
         }
 
         #endregion
