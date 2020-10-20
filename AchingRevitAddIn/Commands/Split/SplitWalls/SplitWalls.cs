@@ -5,8 +5,6 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI.Selection;
-using System.Windows;
-using Autodesk.Revit.Exceptions;
 using System;
 #endregion
 
@@ -42,7 +40,7 @@ namespace AchingRevitAddIn
             return Result.Succeeded;
         }
 
-        static internal void SplitWall()
+        static internal void SplitWall(double gap, int divisions, int divisionType)
         {
             try
             {
@@ -53,186 +51,48 @@ namespace AchingRevitAddIn
                 WallFilter wallFilter = new WallFilter();
                 GridFilter gridFilter = new GridFilter();
 
-                // Apply filter and select multiple walls
-                IList<Reference> wallPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, wallFilter, "Select walls");
-
-                // Apply filter and select multiple grids
-                IList<Reference> gridPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, gridFilter, "Select grids");
-
-                // Convert References to Elements
-                IList<Element> walls = wallPickedReferences.Select(x => doc.GetElement(x)).ToList();
-                IList<Element> grids = gridPickedReferences.Select(x => doc.GetElement(x)).ToList();
-
                 using (Transaction trans = new Transaction(doc))
                 {
                     trans.Start("Split walls");
 
-                    foreach (Wall wall in walls)
+                    if (divisionType == 0)
                     {
-                        Curve wallCurve = ((LocationCurve)wall.Location).Curve;
-                        XYZ startPoint = wallCurve.GetEndPoint(0);
-                        XYZ endPoint = wallCurve.GetEndPoint(1);
-                        XYZ middlePoint = wallCurve.Evaluate(0.5, true);
+                        // Apply filter and select multiple walls
+                        IList<Reference> wallPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, wallFilter, "Select walls");
 
-                        double wallZ = middlePoint.Z;
+                        // Apply filter and select multiple grids
+                        IList<Reference> gridPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, gridFilter, "Select grids");
 
-                        ElementId wallTypeId = wall.WallType.Id;
-                        ElementId wallLevelId = wall.LevelId;
-                        ElementId topConstrain = wall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE).AsElementId();
-                        double wallHeight = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
-                        double baseOffset = wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
-                        double topOffset = wall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET).AsDouble();
+                        // Convert References to Elements
+                        IList<Element> walls = wallPickedReferences.Select(x => doc.GetElement(x)).ToList();
+                        IList<Element> grids = gridPickedReferences.Select(x => doc.GetElement(x)).ToList();
 
-                        // Consider 2cm gap
-                        double gap = 2.0;
-                        double offset = gap / 2;
-                        offset = offset / (12 * 2.54); // feet to centimeter
+                        SplitWalls_Grids(walls, grids, gap);
+                    }
+                    else if (divisionType == 1)
+                    {
+                        // Apply filter and select multiple walls
+                        IList<Reference> wallPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, wallFilter, "Select walls");
 
-                        IList<XYZ> intersectionPoints = new List<XYZ>();
-                        foreach (Grid grid in grids)
-                        {
-                            Curve gridCurve = grid.Curve;
-                            XYZ gridStartPoint = gridCurve.GetEndPoint(0);
-                            XYZ gridEndPoint = gridCurve.GetEndPoint(1);
+                        // Convert References to Elements
+                        IList<Element> walls = wallPickedReferences.Select(x => doc.GetElement(x)).ToList();
 
-                            double startPointX = gridStartPoint.X;
-                            double startPointY = gridStartPoint.Y;
-                            double endPointX = gridEndPoint.X;
-                            double endPointY = gridEndPoint.Y;
+                        SplitWalls_EqualDivisions(walls, gap, divisions);
+                    }
+                    else
+                    {
+                        // Apply filter and select multiple walls
+                        IList<Reference> wallPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, wallFilter, "Select walls");
 
-                            XYZ lineStartPoint = new XYZ(startPointX, startPointY, wallZ);
-                            XYZ lineEndPoint = new XYZ(endPointX, endPointY, wallZ);
+                        // Apply filter and select multiple grids
+                        IList<Reference> gridPickedReferences = uidoc.Selection.PickObjects(ObjectType.Element, gridFilter, "Select grids");
 
-                            Line gridLine = Line.CreateBound(lineStartPoint, lineEndPoint);
+                        // Convert References to Elements
+                        IList<Element> walls = wallPickedReferences.Select(x => doc.GetElement(x)).ToList();
+                        IList<Element> grids = gridPickedReferences.Select(x => doc.GetElement(x)).ToList();
 
-                            XYZ intersectionPoint = new XYZ();
-
-                            try
-                            {
-                                intersectionPoint = GetIntersections(wallCurve as Line, gridLine);
-                            }
-                            catch
-                            {
-                                intersectionPoint = null;
-                            }
-
-                            if (intersectionPoint != null)
-                            {
-                                intersectionPoints.Add(intersectionPoint);
-                            }
-                        }
-
-                        // Sort the points according the curve's direction
-                        intersectionPoints = OrganizePointsAlongLine(wallCurve as Line, intersectionPoints);
-
-                        if (intersectionPoints != null)
-                        {
-                            if (intersectionPoints.Count == 1)
-                            {
-                                Line line1 = Line.CreateBound(startPoint, intersectionPoints[0]);
-                                Line line2 = Line.CreateBound(intersectionPoints[0], endPoint);
-                                double line1Start = line1.GetEndParameter(0);
-                                double line1End = line1.GetEndParameter(1);
-                                double line2Start = line2.GetEndParameter(0);
-                                double line2End = line2.GetEndParameter(1);
-
-                                line1.MakeBound(line1Start, line1End - offset);
-                                line2.MakeBound(line2Start + offset, line2End);
-
-                                Wall wall2 = Wall.Create(doc, line2, wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
-                                Parameter topCons = wall2.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
-                                if (topCons != null)
-                                {
-                                    topCons.Set(topConstrain);
-                                }
-                                Parameter topOff = wall2.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
-                                topOff.Set(topOffset);
-
-                                ((LocationCurve)wall.Location).Curve = line1;
-                                ((LocationCurve)wall2.Location).Curve = line2;
-
-                                if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
-                                    WallUtils.DisallowWallJoinAtEnd(wall, 1);
-                                if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 1))
-                                    WallUtils.DisallowWallJoinAtEnd(wall2, 1);
-                            }
-                            else
-                            {
-                                IList<Line> lines = new List<Line>();
-
-                                for (int i = 0; i < intersectionPoints.Count; i++)
-                                {
-                                    // First grid
-                                    if (i == 0)
-                                    {
-                                        // Create first line
-                                        Line line = Line.CreateBound(startPoint, intersectionPoints[i]);
-                                        double lineStart = line.GetEndParameter(0);
-                                        double lineEnd = line.GetEndParameter(1);
-
-                                        line.MakeBound(lineStart, lineEnd - offset);
-
-                                        // Create second line
-                                        Line line2 = Line.CreateBound(intersectionPoints[i], intersectionPoints[i + 1]);
-                                        double line2Start = line2.GetEndParameter(0);
-                                        double line2End = line2.GetEndParameter(1);
-
-                                        line2.MakeBound(line2Start + offset, line2End - offset);
-
-                                        lines.Add(line);
-                                        lines.Add(line2);
-                                    }
-                                    // Last grid
-                                    else if (i == intersectionPoints.Count - 1)
-                                    {
-                                        Line line = Line.CreateBound(intersectionPoints[i], endPoint);
-                                        double lineStart = line.GetEndParameter(0);
-                                        double lineEnd = line.GetEndParameter(1);
-
-                                        line.MakeBound(lineStart + offset, lineEnd);
-
-                                        lines.Add(line);
-                                    }
-                                    // Intermediate grids
-                                    else
-                                    {
-                                        Line line = Line.CreateBound(intersectionPoints[i], intersectionPoints[i + 1]);
-                                        double lineStart = line.GetEndParameter(0);
-                                        double lineEnd = line.GetEndParameter(1);
-
-                                        line.MakeBound(lineStart + offset, lineEnd - offset);
-
-                                        lines.Add(line);
-                                    }
-                                }
-
-                                for (int i = 0; i < lines.Count; i++)
-                                {
-                                    if (i == 0)
-                                    {
-                                        ((LocationCurve)wall.Location).Curve = lines[i];
-
-                                        if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
-                                            WallUtils.DisallowWallJoinAtEnd(wall, 1);
-                                    }
-                                    else
-                                    {
-                                        Wall newWall = Wall.Create(doc, lines[i], wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
-
-                                        Parameter topCons = newWall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
-                                        if (topCons != null)
-                                        {
-                                            topCons.Set(topConstrain);
-                                        }
-                                        Parameter topOff = newWall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
-                                        topOff.Set(topOffset);
-
-                                        if (WallUtils.IsWallJoinAllowedAtEnd(newWall, 1))
-                                            WallUtils.DisallowWallJoinAtEnd(newWall, 1);
-                                    }
-                                }
-                            }
-                        }
+                        IList<Element> splittedWalls = SplitWalls_Grids(walls, grids, gap);
+                        SplitWalls_EqualDivisions(splittedWalls, gap, divisions);
                     }
 
                     trans.Commit();
@@ -356,6 +216,364 @@ namespace AchingRevitAddIn
             }
 
             return points;
+        }
+
+        /// <summary>
+        /// Split the walls in the intersection between the selected grids
+        /// </summary>
+        /// <param name="walls"></param>
+        /// <param name="grids"></param>
+        /// <param name="gap"></param>
+        /// <returns></returns>
+        static internal List<Element> SplitWalls_Grids(IList<Element> walls, IList<Element> grids, double gap)
+        {
+            UIDocument uidoc = Uidoc;
+            Document doc = uidoc.Document;
+
+            IList<Element> splittedWalls = new List<Element>();
+
+            foreach (Wall wall in walls)
+            {
+                Curve wallCurve = ((LocationCurve)wall.Location).Curve;
+                XYZ startPoint = wallCurve.GetEndPoint(0);
+                XYZ endPoint = wallCurve.GetEndPoint(1);
+                XYZ middlePoint = wallCurve.Evaluate(0.5, true);
+
+                double wallZ = middlePoint.Z;
+
+                ElementId wallTypeId = wall.WallType.Id;
+                ElementId wallLevelId = wall.LevelId;
+                ElementId topConstrain = wall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE).AsElementId();
+                double wallHeight = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
+                double baseOffset = wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+                double topOffset = wall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET).AsDouble();
+
+                // get offset
+                double offset = 0.0;
+                if (gap != 0)
+                {
+                    offset = gap / 2;
+                    offset /= (12 * 2.54); // feet to centimeter
+                }
+
+                IList<XYZ> intersectionPoints = new List<XYZ>();
+                foreach (Grid grid in grids)
+                {
+                    Curve gridCurve = grid.Curve;
+                    XYZ gridStartPoint = gridCurve.GetEndPoint(0);
+                    XYZ gridEndPoint = gridCurve.GetEndPoint(1);
+
+                    double startPointX = gridStartPoint.X;
+                    double startPointY = gridStartPoint.Y;
+                    double endPointX = gridEndPoint.X;
+                    double endPointY = gridEndPoint.Y;
+
+                    XYZ lineStartPoint = new XYZ(startPointX, startPointY, wallZ);
+                    XYZ lineEndPoint = new XYZ(endPointX, endPointY, wallZ);
+
+                    Line gridLine = Line.CreateBound(lineStartPoint, lineEndPoint);
+
+                    XYZ intersectionPoint;
+
+                    try
+                    {
+                        intersectionPoint = GetIntersections(wallCurve as Line, gridLine);
+                    }
+                    catch
+                    {
+                        intersectionPoint = null;
+                    }
+
+                    if (intersectionPoint != null)
+                    {
+                        intersectionPoints.Add(intersectionPoint);
+                    }
+                }
+
+                // Sort the points according the curve's direction
+                intersectionPoints = OrganizePointsAlongLine(wallCurve as Line, intersectionPoints);
+
+                if (intersectionPoints != null)
+                {
+                    if (intersectionPoints.Count == 1)
+                    {
+                        Line line1 = Line.CreateBound(startPoint, intersectionPoints[0]);
+                        Line line2 = Line.CreateBound(intersectionPoints[0], endPoint);
+                        double line1Start = line1.GetEndParameter(0);
+                        double line1End = line1.GetEndParameter(1);
+                        double line2Start = line2.GetEndParameter(0);
+                        double line2End = line2.GetEndParameter(1);
+
+                        line1.MakeBound(line1Start, line1End - offset);
+                        line2.MakeBound(line2Start + offset, line2End);
+
+                        Wall wall2 = Wall.Create(doc, line2, wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
+                        Parameter topCons = wall2.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
+                        if (topCons != null)
+                        {
+                            topCons.Set(topConstrain);
+                        }
+                        Parameter topOff = wall2.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
+                        topOff.Set(topOffset);
+
+                        ((LocationCurve)wall.Location).Curve = line1;
+                        ((LocationCurve)wall2.Location).Curve = line2;
+
+                        if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+                            WallUtils.DisallowWallJoinAtEnd(wall, 1);
+                        if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 1))
+                            WallUtils.DisallowWallJoinAtEnd(wall2, 1);
+
+                        splittedWalls.Add(wall);
+                        splittedWalls.Add(wall2);
+                    }
+                    else
+                    {
+                        IList<Line> lines = new List<Line>();
+
+                        for (int i = 0; i < intersectionPoints.Count; i++)
+                        {
+                            // First grid
+                            if (i == 0)
+                            {
+                                // Create first line
+                                Line line = Line.CreateBound(startPoint, intersectionPoints[i]);
+                                double lineStart = line.GetEndParameter(0);
+                                double lineEnd = line.GetEndParameter(1);
+
+                                line.MakeBound(lineStart, lineEnd - offset);
+
+                                // Create second line
+                                Line line2 = Line.CreateBound(intersectionPoints[i], intersectionPoints[i + 1]);
+                                double line2Start = line2.GetEndParameter(0);
+                                double line2End = line2.GetEndParameter(1);
+
+                                line2.MakeBound(line2Start + offset, line2End - offset);
+
+                                lines.Add(line);
+                                lines.Add(line2);
+                            }
+                            // Last grid
+                            else if (i == intersectionPoints.Count - 1)
+                            {
+                                Line line = Line.CreateBound(intersectionPoints[i], endPoint);
+                                double lineStart = line.GetEndParameter(0);
+                                double lineEnd = line.GetEndParameter(1);
+
+                                line.MakeBound(lineStart + offset, lineEnd);
+
+                                lines.Add(line);
+                            }
+                            // Intermediate grids
+                            else
+                            {
+                                Line line = Line.CreateBound(intersectionPoints[i], intersectionPoints[i + 1]);
+                                double lineStart = line.GetEndParameter(0);
+                                double lineEnd = line.GetEndParameter(1);
+
+                                line.MakeBound(lineStart + offset, lineEnd - offset);
+
+                                lines.Add(line);
+                            }
+                        }
+
+                        for (int i = 0; i < lines.Count; i++)
+                        {
+                            if (i == 0)
+                            {
+                                ((LocationCurve)wall.Location).Curve = lines[i];
+
+                                if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+                                    WallUtils.DisallowWallJoinAtEnd(wall, 1);
+
+                                splittedWalls.Add(wall);
+                            }
+                            else
+                            {
+                                Wall newWall = Wall.Create(doc, lines[i], wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
+
+                                Parameter topCons = newWall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
+                                if (topCons != null)
+                                {
+                                    topCons.Set(topConstrain);
+                                }
+                                Parameter topOff = newWall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
+                                topOff.Set(topOffset);
+
+                                if (WallUtils.IsWallJoinAllowedAtEnd(newWall, 1))
+                                    WallUtils.DisallowWallJoinAtEnd(newWall, 1);
+
+                                splittedWalls.Add(newWall);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return splittedWalls as List<Element>;
+        }
+
+        /// <summary>
+        /// Split walls into equal elements
+        /// </summary>
+        /// <param name="walls"></param>
+        /// <param name="gap"></param>
+        /// <param name="divisions"></param>
+        /// <returns></returns>
+        static internal List<Element> SplitWalls_EqualDivisions(IList<Element> walls, double gap, int divisions)
+        {
+            UIDocument uidoc = Uidoc;
+            Document doc = uidoc.Document;
+
+            IList<Element> splittedWalls = new List<Element>();
+
+            foreach (Wall wall in walls)
+            {
+                Curve wallCurve = ((LocationCurve)wall.Location).Curve;
+                XYZ startPoint = wallCurve.GetEndPoint(0);
+                XYZ endPoint = wallCurve.GetEndPoint(1);
+                XYZ middlePoint = wallCurve.Evaluate(0.5, true);
+
+                ElementId wallTypeId = wall.WallType.Id;
+                ElementId wallLevelId = wall.LevelId;
+                ElementId topConstrain = wall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE).AsElementId();
+                double wallHeight = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
+                double baseOffset = wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+                double topOffset = wall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET).AsDouble();
+
+                // get offset
+                double offset = 0.0;
+                if (gap != 0)
+                {
+                    offset = gap / 2;
+                    offset = offset / (12 * 2.54); // feet to centimeter
+                }
+
+                if (divisions == 1)
+                {
+                    splittedWalls.Add(wall);
+                }
+                else if (divisions == 2)
+                {
+                    Line line1 = Line.CreateBound(startPoint, middlePoint);
+                    Line line2 = Line.CreateBound(middlePoint, endPoint);
+                    double line1Start = line1.GetEndParameter(0);
+                    double line1End = line1.GetEndParameter(1);
+                    double line2Start = line2.GetEndParameter(0);
+                    double line2End = line2.GetEndParameter(1);
+
+                    line1.MakeBound(line1Start, line1End - offset);
+                    line2.MakeBound(line2Start + offset, line2End);
+
+                    Wall wall2 = Wall.Create(doc, line2, wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
+                    Parameter topCons = wall2.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
+                    if (topCons != null)
+                    {
+                        topCons.Set(topConstrain);
+                    }
+                    Parameter topOff = wall2.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
+                    topOff.Set(topOffset);
+
+                    ((LocationCurve)wall.Location).Curve = line1;
+                    ((LocationCurve)wall2.Location).Curve = line2;
+
+                    if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+                        WallUtils.DisallowWallJoinAtEnd(wall, 1);
+                    if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 1))
+                        WallUtils.DisallowWallJoinAtEnd(wall2, 1);
+
+                    splittedWalls.Add(wall);
+                    splittedWalls.Add(wall2);
+                }
+                else
+                {
+                    IList<Line> lines = new List<Line>();
+
+                    for (int i = 1; i < divisions; i++)
+                    {
+                        double segmentLenghtNormalized = 1.0 / (double)divisions;
+                        double segment = segmentLenghtNormalized * i;
+                        XYZ currentPoint = wallCurve.Evaluate(segment, true);
+
+                        // First line
+                        if (i == 1)
+                        {
+                            // Create first line
+                            Line line = Line.CreateBound(startPoint, currentPoint);
+                            double lineStart = line.GetEndParameter(0);
+                            double lineEnd = line.GetEndParameter(1);
+
+                            line.MakeBound(lineStart, lineEnd - offset);
+
+                            // Create second line
+                            XYZ nextPoint = wallCurve.Evaluate(segment + segmentLenghtNormalized, true);
+                            Line line2 = Line.CreateBound(currentPoint, nextPoint);
+                            double line2Start = line2.GetEndParameter(0);
+                            double line2End = line2.GetEndParameter(1);
+
+                            line2.MakeBound(line2Start + offset, line2End - offset);
+
+                            lines.Add(line);
+                            lines.Add(line2);
+                        }
+                        // Last line
+                        else if (i == divisions - 1)
+                        {
+                            Line line = Line.CreateBound(currentPoint, endPoint);
+                            double lineStart = line.GetEndParameter(0);
+                            double lineEnd = line.GetEndParameter(1);
+
+                            line.MakeBound(lineStart + offset, lineEnd);
+
+                            lines.Add(line);
+                        }
+                        // Intermediate lines
+                        else
+                        {
+                            XYZ nextPoint = wallCurve.Evaluate(segment + segmentLenghtNormalized, true);
+                            Line line = Line.CreateBound(currentPoint, nextPoint);
+                            double lineStart = line.GetEndParameter(0);
+                            double lineEnd = line.GetEndParameter(1);
+
+                            line.MakeBound(lineStart + offset, lineEnd - offset);
+
+                            lines.Add(line);
+                        }
+                    }
+
+                    for (int i = 0; i < lines.Count; i++)
+                    {
+                        if (i == 0)
+                        {
+                            ((LocationCurve)wall.Location).Curve = lines[i];
+
+                            if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+                                WallUtils.DisallowWallJoinAtEnd(wall, 1);
+
+                            splittedWalls.Add(wall);
+                        }
+                        else
+                        {
+                            Wall newWall = Wall.Create(doc, lines[i], wallTypeId, wallLevelId, wallHeight, baseOffset, false, true);
+
+                            Parameter topCons = newWall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE);
+                            if (topCons != null)
+                            {
+                                topCons.Set(topConstrain);
+                            }
+                            Parameter topOff = newWall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
+                            topOff.Set(topOffset);
+
+                            if (WallUtils.IsWallJoinAllowedAtEnd(newWall, 1))
+                                WallUtils.DisallowWallJoinAtEnd(newWall, 1);
+
+                            splittedWalls.Add(newWall);
+                        }
+                    }
+                }
+            }
+
+            return splittedWalls as List<Element>;
         }
 
         #endregion

@@ -7,7 +7,7 @@
             mc:Ignorable="d" 
             Icon="/AchingRevitAddIn;component/Images/Icons/AchingIcon16x16.ico"
             Title="Split Walls"
-            Height="285"
+            Height="210"
             Width="300"
             FontSize="12"
             ResizeMode="NoResize"
@@ -15,8 +15,8 @@
     <Border Padding="10">
         <Grid>
             <StackPanel>
-                <TabControl>
-                    <TabItem Header="Grids">
+                <TabControl x:Name="tabs">
+                    <TabItem Header="Grids" Name="Grids">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -37,30 +37,10 @@
                                 <TextBlock Text="Number of elements:" Margin="10 5 0 5" Grid.Column="0" VerticalAlignment="Center"/>
                                 <TextBox x:Name="Divide_Grid" Margin="0 5 10 5" Padding="3" Grid.Column="1" IsEnabled="False" Background="LightGray"/>
                             </Grid>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Text="Select walls:" Margin="10 5 0 5" Grid.Column="0" VerticalAlignment="Center"/>
-                                <Button x:Name="SelectWallsButton_Grid" Grid.Column="1" Content="Select" Margin="0 5 10 5" Padding="5"/>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Text="Select grids:" Margin="10 5 0 10" Grid.Column="0" VerticalAlignment="Center"/>
-                                <Button x:Name="SelectGridsButton_Grid" Grid.Column="1" Content="Select" Margin="0 5 10 10" Padding="5"/>
-                            </Grid>
                         </StackPanel>
                     </TabItem>
 
-                    <TabItem Header="Equal parts">
+                    <TabItem Header="Equal parts" Name="EqualParts">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -81,30 +61,10 @@
                                 <TextBlock Text="Number of elements:" Margin="10 5 0 5" Grid.Column="0" VerticalAlignment="Center"/>
                                 <TextBox x:Name="Divide_Equal" Margin="0 5 10 5" Padding="3" Grid.Column="1"/>
                             </Grid>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Text="Select walls:" Margin="10 5 0 5" Grid.Column="0" VerticalAlignment="Center"/>
-                                <Button x:Name="SelectWallsButton_Equal" Grid.Column="1" Content="Select" Margin="0 5 10 5" Padding="5"/>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Text="Select grids:" Margin="10 5 0 10" Grid.Column="0" VerticalAlignment="Center"/>
-                                <Button x:Name="SelectGridsButton_Equal" Grid.Column="1" Content="Select" Margin="0 5 10 10" Padding="5" IsEnabled="False"/>
-                            </Grid>
                         </StackPanel>
                     </TabItem>
 
-                    <TabItem Header="Grids &amp; Equal parts">
+                    <TabItem Header="Grids &amp; Equal parts" Name="GridsAndEqual">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -124,26 +84,6 @@
 
                                 <TextBlock Text="Number of elements:" Margin="10 5 0 5" Grid.Column="0" VerticalAlignment="Center"/>
                                 <TextBox x:Name="Divide_GridEqual" Margin="0 5 10 5" Padding="3" Grid.Column="1"/>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Text="Select walls:" Margin="10 5 0 5" Grid.Column="0" VerticalAlignment="Center"/>
-                                <Button x:Name="SelectWallsButton_GridEqual" Grid.Column="1" Content="Select" Margin="0 5 10 5" Padding="5"/>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Text="Select grids:" Margin="10 5 0 10" Grid.Column="0" VerticalAlignment="Center"/>
-                                <Button x:Name="SelectGridsButton_GridEqual" Grid.Column="1" Content="Select" Margin="0 5 10 10" Padding="5"/>
                             </Grid>
                         </StackPanel>
                     </TabItem>
