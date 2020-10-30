@@ -7,7 +7,7 @@
             mc:Ignorable="d" 
             Icon="/AchingRevitAddIn;component/Images/Icons/AchingIcon16x16.ico"
             Title="Split Walls"
-            Height="210"
+            Height="300"
             Width="300"
             FontSize="12"
             ResizeMode="NoResize"
@@ -89,7 +89,20 @@
                     </TabItem>
 
                 </TabControl>
-                
+
+                <Border Padding="10" Margin="0 5 0 0" BorderThickness="1" BorderBrush="DarkGray">
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Split detail:" Grid.Column="0" VerticalAlignment="Center"/>
+
+                    </Grid>
+                </Border>
+
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>

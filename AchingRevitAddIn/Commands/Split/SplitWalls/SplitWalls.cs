@@ -35,11 +35,15 @@ namespace AchingRevitAddIn
             SplitWallsUI splitWallsUI = new SplitWallsUI();
             splitWallsUI.ShowDialog();
 
-            //SplitWall();
-
             return Result.Succeeded;
         }
 
+        /// <summary>
+        /// Main method to call the other methods
+        /// </summary>
+        /// <param name="gap"></param>
+        /// <param name="divisions"></param>
+        /// <param name="divisionType"></param>
         static internal void SplitWall(double gap, int divisions, int divisionType)
         {
             try
@@ -68,6 +72,7 @@ namespace AchingRevitAddIn
                         IList<Element> grids = gridPickedReferences.Select(x => doc.GetElement(x)).ToList();
 
                         SplitWalls_Grids(walls, grids, gap);
+
                     }
                     else if (divisionType == 1)
                     {
@@ -77,7 +82,16 @@ namespace AchingRevitAddIn
                         // Convert References to Elements
                         IList<Element> walls = wallPickedReferences.Select(x => doc.GetElement(x)).ToList();
 
-                        SplitWalls_EqualDivisions(walls, gap, divisions);
+                        //SplitWalls_EqualDivisions(walls, gap, divisions);
+                        IList<Element> splittedWalls = SplitWalls_EqualDivisions(walls, gap, divisions);
+
+                        doc.Regenerate();
+
+                        for (int i = 0; i < splittedWalls.Count; i++)
+                        {
+                            AddVerticalReveals(splittedWalls[i] as Wall);
+                        }
+
                     }
                     else
                     {
@@ -319,8 +333,12 @@ namespace AchingRevitAddIn
                         ((LocationCurve)wall.Location).Curve = line1;
                         ((LocationCurve)wall2.Location).Curve = line2;
 
+                        if (WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
+                            WallUtils.DisallowWallJoinAtEnd(wall, 0);
                         if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
                             WallUtils.DisallowWallJoinAtEnd(wall, 1);
+                        if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 0))
+                            WallUtils.DisallowWallJoinAtEnd(wall2, 0);
                         if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 1))
                             WallUtils.DisallowWallJoinAtEnd(wall2, 1);
 
@@ -383,6 +401,8 @@ namespace AchingRevitAddIn
                             {
                                 ((LocationCurve)wall.Location).Curve = lines[i];
 
+                                if (WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
+                                    WallUtils.DisallowWallJoinAtEnd(wall, 0);
                                 if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
                                     WallUtils.DisallowWallJoinAtEnd(wall, 1);
 
@@ -402,6 +422,8 @@ namespace AchingRevitAddIn
 
                                 if (WallUtils.IsWallJoinAllowedAtEnd(newWall, 1))
                                     WallUtils.DisallowWallJoinAtEnd(newWall, 1);
+                                if (WallUtils.IsWallJoinAllowedAtEnd(newWall, 0))
+                                    WallUtils.DisallowWallJoinAtEnd(newWall, 0);
 
                                 splittedWalls.Add(newWall);
                             }
@@ -477,8 +499,12 @@ namespace AchingRevitAddIn
                     ((LocationCurve)wall.Location).Curve = line1;
                     ((LocationCurve)wall2.Location).Curve = line2;
 
+                    if (WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
+                        WallUtils.DisallowWallJoinAtEnd(wall, 0);
                     if (WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
                         WallUtils.DisallowWallJoinAtEnd(wall, 1);
+                    if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 0))
+                        WallUtils.DisallowWallJoinAtEnd(wall2, 0);
                     if (WallUtils.IsWallJoinAllowedAtEnd(wall2, 1))
                         WallUtils.DisallowWallJoinAtEnd(wall2, 1);
 
@@ -564,6 +590,8 @@ namespace AchingRevitAddIn
                             Parameter topOff = newWall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET);
                             topOff.Set(topOffset);
 
+                            if (WallUtils.IsWallJoinAllowedAtEnd(newWall, 0))
+                                WallUtils.DisallowWallJoinAtEnd(newWall, 0);
                             if (WallUtils.IsWallJoinAllowedAtEnd(newWall, 1))
                                 WallUtils.DisallowWallJoinAtEnd(newWall, 1);
 
@@ -574,6 +602,63 @@ namespace AchingRevitAddIn
             }
 
             return splittedWalls as List<Element>;
+        }
+
+        /// <summary>
+        /// Insert vertical reveals on the four corners of a wall
+        /// </summary>
+        /// <param name="wall"></param>
+        static internal void AddVerticalReveals(Wall wall)
+        {
+            UIDocument uidoc = Uidoc;
+            Document doc = uidoc.Document;
+
+            Curve wallCurve = ((LocationCurve)wall.Location).Curve;
+            double curveStart = wallCurve.GetEndParameter(0);
+            double curveEnd = wallCurve.GetEndParameter(1);
+
+            // Get the reveal profile
+            ElementType wallRevealType = new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_Reveals)
+                .WhereElementIsElementType()
+                .Cast<ElementType>()
+                .FirstOrDefault();
+
+            if (wallRevealType != null)
+            {
+                var wallRevealInfo1 = new WallSweepInfo(WallSweepType.Reveal, true);
+                wallRevealInfo1.DistanceMeasuredFrom = DistanceMeasuredFrom.Base;
+                wallRevealInfo1.Distance = curveStart;
+                wallRevealInfo1.WallSide = WallSide.Exterior;
+                wallRevealInfo1.IsProfileFlipped = false;
+
+                var wallRevealInfo2 = new WallSweepInfo(WallSweepType.Reveal, true);
+                wallRevealInfo2.DistanceMeasuredFrom = DistanceMeasuredFrom.Base;
+                wallRevealInfo2.Distance = curveStart;
+                wallRevealInfo2.WallSide = WallSide.Interior;
+                wallRevealInfo2.IsProfileFlipped = true;
+
+                var wallRevealInfo3 = new WallSweepInfo(WallSweepType.Reveal, true);
+                wallRevealInfo3.DistanceMeasuredFrom = DistanceMeasuredFrom.Top;
+                wallRevealInfo3.Distance = curveEnd;
+                wallRevealInfo3.WallSide = WallSide.Exterior;
+                wallRevealInfo3.IsProfileFlipped = true;
+
+                var wallRevealInfo4 = new WallSweepInfo(WallSweepType.Reveal, true);
+                wallRevealInfo4.DistanceMeasuredFrom = DistanceMeasuredFrom.Top;
+                wallRevealInfo4.Distance = curveEnd;
+                wallRevealInfo4.WallSide = WallSide.Interior;
+                wallRevealInfo4.IsProfileFlipped = false;
+
+                WallSweep.Create(wall, wallRevealType.Id, wallRevealInfo1);
+                WallSweep.Create(wall, wallRevealType.Id, wallRevealInfo2);
+                WallSweep.Create(wall, wallRevealType.Id, wallRevealInfo3);
+                WallSweep.Create(wall, wallRevealType.Id, wallRevealInfo4);
+            }
+            else
+            {
+                TaskDialog.Show("ERROR", "No wall reveal type was found!");
+            }
         }
 
         #endregion
